@@ -16,7 +16,7 @@ download.file(inUrl2,infile2)
 ###Met station
 inUrl3  <- "https://pasta.lternet.edu/package/data/eml/edi/389/7/02d36541de9088f2dd99d79dc3a7a853"
 infile3 <- paste0(getwd(),"/Data/EDI2023/FCR_Met_final_2015_2022.csv")
-download.file(inUrl3,infile3)
+download.file(inUrl3,infile3, method = "curl")
 
 
 ### EXO data
