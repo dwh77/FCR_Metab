@@ -66,9 +66,9 @@ download.file(inUrl11,infile11)
 
 
 ### download filtered chla
-inUrl12  <- "https://pasta.lternet.edu/package/data/eml/edi/555/3/2f670c8316af634c76effdd205623912"
-infile12 <- paste0(getwd(),"/Data/EDI2023/manual_chlorophyll_2014_2022.csv")
-download.file(inUrl12,infile12)
+# inUrl12  <- "https://pasta.lternet.edu/package/data/eml/edi/555/3/2f670c8316af634c76effdd205623912"
+# infile12 <- paste0(getwd(),"/Data/EDI2023/manual_chlorophyll_2014_2022.csv")
+# download.file(inUrl12,infile12)
 
 
 

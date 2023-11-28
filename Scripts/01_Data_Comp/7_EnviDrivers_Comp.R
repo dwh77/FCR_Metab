@@ -14,8 +14,6 @@ library(Metrics)
 #read in data from EDI
 catwalk_EDI <- read_csv("./Data/EDI2023/FCR_Catwalk_2018_2022.csv", col_types = cols(.default = "d", Reservoir = "c", DateTime = "T"))
 
-head(catwalk_EDI)
-
 #Exo daily 
 exo_daily <- catwalk_EDI %>% 
   mutate(Date = as.Date(DateTime)) %>% 
@@ -25,14 +23,11 @@ exo_daily <- catwalk_EDI %>%
   filter(Date > ymd("2018-08-28"),
          Date < ymd("2022-03-02")) 
 
-head(exo_daily)
-tail(exo_daily)
 
 ### compile met variables and summarize to 10 or 15 for exo or wvwa #### 
 
 #read in data from EDI
 met_EDI <- read_csv("./Data/EDI2023/FCR_Met_final_2015_2022.csv")
-head(met_EDI)
 
 #daily met 
 met_daily <- met_EDI %>% 
@@ -43,12 +38,9 @@ met_daily <- met_EDI %>%
   filter(Date > ymd("2015-11-10"),
          Date < ymd("2022-03-02")) 
 
-head(met_daily)
-tail(met_daily)
 
 #### MET NLDAS ####
 nldas <- read_csv("./Data/Carey2022_glm/FCR_GLM_NLDAS_010113_123119_GMTadjusted.csv")
-head(nldas)
 
 nldas_daily <- nldas %>% 
   mutate(Date = as.Date(time)) %>% 
@@ -116,8 +108,6 @@ MET_FIN <- rbind(nldasmet_regress, met_2020_2022)
 #### Hydrology ####
 inflow <- read_csv("./Data/EDI2023/FCR_weir_2022.csv")
 
-head(inflow) 
-tail(inflow)
 
 inf_filt <- inflow %>% 
   select(DateTime, WVWA_Flow_cms, VT_Flow_cms) %>% 
@@ -134,8 +124,6 @@ inf_daily <- inf_filt %>%
          WRT_days_daily_vt = ( (3.1E5/VT_Flow_cms_daily_mean) * (1/60) * (1/60) * (1/24) )
          ) 
 
-head(inf_daily)
-tail(inf_daily)
 
 inf_daily_fin <- inf_daily %>% 
   mutate(Fin_WRT_days = ifelse(is.na(WRT_days_daily_wvwa), WRT_days_daily_vt, WRT_days_daily_wvwa),
@@ -143,8 +131,6 @@ inf_daily_fin <- inf_daily %>%
          ) %>% 
   select(Date, Fin_flow_cms) 
 
-head(inf_daily_fin)
-tail(inf_daily_fin)
 
 #WRT stats 
 inf_wrt <- inf_daily %>% 
@@ -172,7 +158,6 @@ chemA <- chem %>%
   filter(Date > ymd("2015-11-10")) %>% 
   select(Date, TN_ugL, TP_ugL, DOC_mgL, SRP_ugL, NO3NO2_ugL, NH4_ugL)
 
-head(chemA)
 
 chemB <- chemA %>% 
   group_by(Date) %>% 
@@ -235,17 +220,14 @@ parKD <- par %>%
   
 
 #### Put KD data together ####
-head(secchiA)
 secchi_Kd_fin <- secchiA %>% rename(Kd_secchi = Kd)
 
-head(ctdKD)
 ctdKD_fin <- ctdKD %>% 
   mutate(k = -k,
          Date = as.Date(Date)) %>%
   group_by(Date) %>% 
   summarise(Kd_ctd = mean(k))
   
-head(parKD)
 parKD_fin <- parKD %>% 
   mutate(k = -k,
          Date = as.Date(Date)) %>%
@@ -304,8 +286,6 @@ E0_df_daily <- E0_df %>%
 
 # get top of metalim 
 temp_prof_15_18 <- read_csv("./Data/Model_Input/2015_18/FCR_2015_18_TempProfiles_hobos_and_interped2018.csv")
-head(temp_prof_15_18)
-tail(temp_prof_15_18)
 
 
 temp_prof_18_22 <- read_csv("./Data/Model_Input/2018_22/FCR_2018_22_TempProfiles.csv") %>% 
@@ -366,14 +346,14 @@ head(schmidt)
 #   select(Date, Chla_ugL)
 
 #### Combine ####
-head(exo_daily) 
-head(MET_FIN) #met that corrects for gaps w/ NDLAS interp 
-head(inf_daily_fin) #mean daily inflow in cms
-head(chemB)
-head(kd_FIN)
-head(E24_tojoin)
-head(schmidt)
-#head(filtchla_A)
+# head(exo_daily) 
+# head(MET_FIN) #met that corrects for gaps w/ NDLAS interp 
+# head(inf_daily_fin) #mean daily inflow in cms
+# head(chemB)
+# head(kd_FIN)
+# head(E24_tojoin)
+# head(schmidt)
+####head(filtchla_A)
 
 ## join data together 
 joinA <- full_join(MET_FIN, exo_daily, by = "Date")

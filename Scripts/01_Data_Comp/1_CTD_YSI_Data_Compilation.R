@@ -13,7 +13,7 @@ ysi2018 <- ysi_edi %>%
   filter(Reservoir == "FCR",
          Site == 50,
          Depth_m > 0,
-         DateTime >= ymd("2018-01-10"),
+         DateTime >= ymd("2018-01-10"), #these dates are to check if theres YSI casts in timeframe where we're missing thermistor temp profiles
          DateTime <= ymd("2018-07-10"),
          !is.na(Temp_C)) 
 
@@ -56,7 +56,7 @@ ctd_2018 <- ctd_edi %>%
          Date <= ymd("2018-07-10")) 
 
 ctd_2018dates <- unique(ctd_2018$Date)
-ctd_2018dates
+
 
 
 #filter to desired data 
@@ -76,7 +76,6 @@ ctd_flagcheck <- ctd_fcrmetab %>%
 #rename ctd data to fit with prior code for processing
 ctd <- ctd_fcrmetab
 
-head(ctd)
 
 # filter out depths in the CTD cast that are closest to these specified values.
 df.final<-data.frame()
@@ -123,13 +122,11 @@ ctd <- arrange(df.final, Date)
 ctd$Depth_m <- round(as.numeric(ctd$Depth_m), digits = 1) 
 ctd <- ctd[!duplicated(ctd),] #removed duplicated rows 
 
-head(ctd)
 
 #drop flags since there's no flag issues besides days sample wasn't collected for DO 
 ctd <- ctd %>% 
   select(-Flag_Temp_C, -Flag_DO_mgL, -Flag_DOsat_percent)
 
-head(ctd)
 
 #write filtered ctd csv
 

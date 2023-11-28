@@ -10,12 +10,14 @@ library(zoo) #for na.approx
 #library(plyr) # for rbind.fill
 
 
+dir.create('Data/Model_Input/2018_22')
+dir.create('Data/Model_Input/2015_18')
+
 ### Compile EXO and thermistor data ####
 
 #read in data from EDI
 catwalk_EDI <- read_csv("./Data/EDI2023/FCR_Catwalk_2018_2022.csv", col_types = cols(.default = "d", Reservoir = "c", DateTime = "T"))
 
-head(catwalk_EDI)
 
 ##Geting EXO DO and Sensor temp for each year and writing csvs to use in metab model
 
@@ -90,7 +92,6 @@ write.csv(temp_profiles_2018_22, file = "./Data/Model_Input/2018_22/FCR_2018_22_
 
 #read in data from EDI
 met_EDI <- read_csv("./Data/EDI2023/FCR_Met_final_2015_2022.csv")
-head(met_EDI)
 
 ##first get 10 min par and windspeed for EXO data 
 
@@ -428,8 +429,6 @@ plot(dailyinterp_toCatwalk_comp$dateTime, dailyinterp_toCatwalk_comp$Diff)
 round(rmse(dailyinterp_toCatwalk_comp$ctd_ysi_interp, dailyinterp_toCatwalk_comp$Catwalk), digits = 3)
 
 ## Put all data together 
-head(jan18_hobos)
-tail(jan18_hobos)
 
 temp_profiles_18gap_glm_hourly <- temp_profiles_glm_hourly %>% 
   filter(dateTime >= ymd_hms("2018-01-15 00:00:00"),
@@ -440,13 +439,6 @@ ctd_ysi_binded_18_daily_interpolated_forjoin <- ctd_ysi_binded_18_daily_interpol
   filter(dateTime >= ymd("2018-04-23"),
          dateTime <= ymd("2018-07-06"))
 
-head(ctd_ysi_binded_18_daily_interpolated_forjoin)
-tail(ctd_ysi_binded_18_daily_interpolated_forjoin)
-
-
-head(scc_thermistors)
-
-#joined <- plyr::rbind.fill(jan18_hobos, temp_profiles_18gap_glm_hourly, ctd_ysi_binded_18_daily_interpolated_forjoin, scc_thermistors)
 joined <- dplyr::bind_rows(jan18_hobos, temp_profiles_18gap_glm_hourly, ctd_ysi_binded_18_daily_interpolated_forjoin, scc_thermistors)
 
 profiles2018_final <- joined %>% 
@@ -458,12 +450,6 @@ profiles2018_final <- joined %>%
 write.csv(profiles2018_final, file = "./Data/Model_Input/2015_18/FCR_2018_TempProfiles_hobo_glm_ctdysi_scc.csv", row.names = FALSE) 
 
 #make a csv that has hobos 2015 - jan2018 the interpolated values from csv above 
-head(profiles2015_18)
-tail(profiles2015_18)
-
-head(profiles2018_final)
-tail(profiles2018_final)
-
 
 profiles2015_18_forbind <- profiles2015_18 %>% 
   dplyr::filter(dateTime < ymd_hms("2017-12-31 00:00:00")) %>% 
@@ -477,6 +463,3 @@ profiles2015_18_withInterpolated2018 <- profiles2015_18_withInterpolated2018 %>%
 
 
 write.csv(profiles2015_18_withInterpolated2018, file = "./Data/Model_Input/2015_18/FCR_2015_18_TempProfiles_hobos_and_interped2018.csv", row.names = FALSE) 
-
-
-

@@ -15,8 +15,9 @@ install.packages('gridExtra')
 install.packages('stringr') #wrap x axis label text
 install.packages('cowplot') #for plot_grid
 install.packages('FSA') #dunn test
-install.packages('suncalc')
-install.packages('here')
 install.packages('Hmisc')  #rcorr
 install.packages('corrplot') #corrplot
 install.packages('MuMIn') #for dredge
+#from FEO
+install.packages('suncalc')
+install.packages('here')

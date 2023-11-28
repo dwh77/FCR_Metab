@@ -60,7 +60,6 @@ overlap_nocorrection <- ggplot()+
   ggtitle("DO sonde comparison - no correction")+
   theme_classic()
 
-overlap_nocorrection
 
 ## Calculating offset 
 
@@ -82,13 +81,11 @@ overlap_correction <- ggplot()+
   ggtitle("DO sonde comparison - correction \n Insite_corr = Insite + 1.687")+
   theme_classic()
 
-overlap_correction
 
 overlap_comparison <- overlap_nocorrection / overlap_correction
 
-overlap_comparison
 
-ggsave(filename = "./Figures/MS_final/DO_offset_overlap_comparison.png", 
+ggsave(filename = "./Figures/Fig_S1_DO_offset_overlap_comparison.png", 
        overlap_comparison, device = "png", width = 230, height = 150, units = "mm")
   
 

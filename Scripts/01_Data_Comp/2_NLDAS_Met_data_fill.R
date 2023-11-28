@@ -10,7 +10,7 @@ library(Metrics) #rmse
 
 #### Read in and format data ####
 #Read in data 
-nldas <- read_csv("./Data/FCR_GLM_NLDAS_010113_123119_GMTadjusted.csv")
+nldas <- read_csv("./Data/Carey2022_glm/FCR_GLM_NLDAS_010113_123119_GMTadjusted.csv")
 
 nldas_filt <- nldas %>% 
   filter(time >= ymd_hms("2015-11-09 00:00:00"))
@@ -59,7 +59,7 @@ SW_nldas_fcrmet<- joinedSW %>%
 
 SW_nldas_fcrmet
 
-ggsave(filename = "./Figures/Shortwave_NLDAS_FCRmet.png",
+ggsave(filename = "./Figures/Fig_S2_Shortwave_NLDAS_FCRmet.png",
        SW_nldas_fcrmet, device = "png", width = 180, height = 150, units = "mm")
 
 #### Comparing NLDAS to FCR WindSpeed data ####
@@ -85,18 +85,23 @@ Wind_nldas_fcrmet<- joinedSW %>%
 
 Wind_nldas_fcrmet
 
-ggsave(filename = "./Figures/WindSpeed_NLDAS_FCRmet.png",
+ggsave(filename = "./Figures/Fig_S3_WindSpeed_NLDAS_FCRmet.png",
        Wind_nldas_fcrmet, device = "png", width = 180, height = 150, units = "mm")
 
 
 
 #### Make input files for SW and WindSpeed based on NLDAS ####
 
+sw_lm <- summary(lm(joinedSW$SW_hourly~joinedSW$ShortWave))
+wind_lm <- summary(lm(joinedSW$Wind_hourly~joinedSW$WindSpeed))
+
+
 model_input <- joinedSW %>% 
   select(time, SW_hourly, Wind_hourly, ShortWave, WindSpeed) %>% 
-  mutate(SW_regress = ( -13.4 + (0.917 * ShortWave) ) ,
-         WindSpeed_regress = ( 1.1 + (0.238 * WindSpeed) )
-         ) %>% 
+  # mutate(SW_regress = ( -13.4 + (0.917 * ShortWave) ) ,
+  #        WindSpeed_regress = ( 1.1 + (0.238 * WindSpeed) )       ) %>% 
+  mutate(SW_regress = ( coefficients(sw_lm)[1] + (coefficients(sw_lm)[2]* ShortWave) ) ,
+         WindSpeed_regress = ( coefficients(wind_lm)[1] + (coefficients(wind_lm)[2] * WindSpeed) )) %>% 
   mutate(PAR_from_SWregress = sw.to.par.base(SW_regress, coeff = 2.114)) %>% 
   rename(SW_hourly_metstation = SW_hourly,
          Wind_hourly_metstation = Wind_hourly,
@@ -104,7 +109,7 @@ model_input <- joinedSW %>%
          WindSpeed_nldas = WindSpeed)
 
 #write csv
-write.csv(model_input, "./Data/Met_input_from_NDLAS.csv", row.names = F)
+write.csv(model_input, "./Data/Met_input_from_NLDAS.csv", row.names = F)
 
 
 #check rmse and model fit for SW and Wind

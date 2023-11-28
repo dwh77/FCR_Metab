@@ -19,7 +19,7 @@ bathy_schmidt <- edi_bathy %>%
 ### read in Catwalk and hobo thermistors, and interpolated temp profiles for early 2018
 hobo_tempprofs <- read_csv("./Data/Model_Input/2015_18/FCR_2015_18_TempProfiles_hobos.csv") 
 
-interp2018_profiles <- read_csv("./Data/Model_Input/FCR_2018_TempProfiles_hobo_glm_ctdysi_scc.csv") %>% 
+interp2018_profiles <- read_csv("./Data/Model_Input/2015_18/FCR_2018_TempProfiles_hobo_glm_ctdysi_scc.csv") %>% 
   filter(dateTime > ymd_hms("2018-01-15 00:00:00"),
          dateTime < ymd_hms("2018-08-29 00:00:00"))
 
@@ -64,7 +64,7 @@ schmidt_data <- strat_calcs %>%
          wtr_05.0, wtr_06.0, wtr_06.2, wtr_07.0, wtr_08.0, wtr_09.0, wtr_09.3)
 
 schmidt <- ts.schmidt.stability(schmidt_data, bathy_schmidt, na.rm = T)
-plot(schmidt$datetime, schmidt$schmidt.stability)
+#plot(schmidt$datetime, schmidt$schmidt.stability)
 
 # buoy <- ts.buoyancy.freq(schmidt_data, na.rm = F) #NAs giving shorter TS and na.rm = T gives error
 # plot(buoy$datetime, buoy$n2)
@@ -91,9 +91,9 @@ daily_ROC <- strat_calcsA %>%
   ) %>% 
   mutate(ROC_schmidt = ifelse(ROC_schmidt > 40, NA, ROC_schmidt)) #remove ROC when 2018 gap happens 
 
-plot(daily_ROC$Date, daily_ROC$schmidt_daily)
-plot(daily_ROC$Date, daily_ROC$Schmidt_percent_max)
-plot(daily_ROC$Date, daily_ROC$ROC_schmidt)
+#plot(daily_ROC$Date, daily_ROC$schmidt_daily)
+#plot(daily_ROC$Date, daily_ROC$Schmidt_percent_max)
+#plot(daily_ROC$Date, daily_ROC$ROC_schmidt)
 
 
 daily_ROC_long <- daily_ROC %>% 
@@ -111,7 +111,7 @@ roc_plots <- daily_ROC_long %>%
   facet_wrap(~new_name, scales = "free_y", nrow = 6)+
   theme_classic()
 
-roc_plots
+#roc_plots
 #ggplotly(roc_plots)
 # ggsave(filename = "./Figures/Schmidt_0.1dens_ROC_figure.png",
 #        roc_plots, device = "png", width = 300, height = 300, units = "mm")
@@ -128,7 +128,7 @@ dens_diff <- daily_ROC_long %>%
   geom_hline(yintercept = 0.05)+
   theme_classic()
 
-dens_diff
+#dens_diff
 #ggplotly(dens_diff)
 # ggsave(filename = "./Figures/DensityDiff_1to8m.png",
 #        dens_diff, device = "png", width = 300, height = 300, units = "mm")

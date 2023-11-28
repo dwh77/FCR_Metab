@@ -53,6 +53,8 @@
 ## check working directory, if its not at base of project ./FCR_Metabolism, manually reset to this point
 getwd()
 
+##FEO addition check if this works 
+setwd(here::here())
 
 #load packages
 #ad in if from line 88
@@ -77,6 +79,7 @@ dataIn  <- c("FCR_2018_2022_DO.csv", "FCR_2018_2022_sensorTemp.csv", "FCR_2018_2
             #   'Acton_2008_sensorTemp.txt','Acton_2008_tempProfile.txt')
 dirFxns  <- "./Scripts/Metab_Model"    # Directory where functions are located, e.g. 'C:/GLEON/functions'
 dirDump  <- "./Data/Model_Output/FCR2018_22"   # Directory where outputs should be dumped, e.g. 'C:/GLEON/Acton/Results'
+dir.create(dirDump)
 
 ice <- read_csv("./Data/Seasons_Ice_corrected_groupings.csv")
 
@@ -337,8 +340,7 @@ dataSensorTemp <- fillHoles(dataSensorTemp,maxLength=366,timeStep=timeStep)
 #windSpeed - fill with daily average as long as at least 80% of data are available
 
 #Loop over days
-for (i in 1:length(unique(solarDaysVec))-1)
-{
+for (i in 1:length(unique(solarDaysVec))-1){
   
   #Extract data between sunrise on day i and sunrise on day i+1
   timeSlice <- c(sun$sunrise[i], sun$sunrise[i+1]+(2*60*60*hours.BeforeAfter)) 
@@ -366,8 +368,7 @@ for (i in 1:length(unique(solarDaysVec))-1)
 nCols <- dim(dataTempProfile)[2]
 
 #Loop over the columns of dataTempProfile
-for (i in 2:nCols)
-{
+for (i in 2:nCols){
   dataTemp <- dataTempProfile[,c(1,i)]
   dataTempFilled <- fillHoles(dataTemp,maxLength=366,timeStep=timeStep)
   dataTempProfile[,i] <- dataTempFilled[,2]
@@ -383,8 +384,7 @@ for (i in 2:nCols)
 dataDensProfile<-dataTempProfile
 
 ##Loop through the columns
-for (j in 2:ncol(dataDensProfile))
-{
+for (j in 2:ncol(dataDensProfile)){
   dataDensProfile[,j]=1000*(1 - (dataTempProfile[,j]+288.9414)/(508929.2*(dataTempProfile[,j]+68.12963))*(dataTempProfile[,j]-3.9863)^2)
   ##Calculation for converting temperature to density:
   ##rho = 1000(1 - (T+288.9414)/(508929.2*(T+68.12963))*(T-3.9863)^2)
@@ -644,8 +644,8 @@ par(mar=c(1,2,0,0)+0.1)
 ##
 #Run optimization for each day
 
-for (i in 1:nDays) #nDays
-{
+for (i in 1:nDays){ #nDays
+
   
   #Print occasional progress report on i
   if (i %in% seq(1,nDays,10)) (print(paste("Starting day",i)))
@@ -922,8 +922,7 @@ for (i in 1:nDays)
 
 # For each daylight period, average R from night before and after
 Rmean<-rep(NA,length(R_nightly)-1)
-for (i in 1:length(R_nightly)-1)
-{
+for (i in 1:length(R_nightly)-1){
   Rmean[i]<-(R_nightly[i]+R_nightly[i+1])/2 # grams O2 m^-3 day^-1
 }
 
@@ -932,8 +931,7 @@ R <- c(R_nightly[1], Rmean)  # grams O2 m^-3 day^-1
 
 # Calculate daylight NEP (this is NOT 24hr NEP)
 Nd <- rep(NA,nDays)
-for (i in 1:length(Nd))
-{
+for (i in 1:length(Nd)){
   r <- which(dateTime>sun$sunrise[i] & dateTime<sun$sunset[i])
   Nd[i] <- mean(m[r],na.rm=T) * (as.double(sun$sunset[i]-sun$sunrise[i],units="mins"))
   # grams O2 m^-3 daylight period^-1

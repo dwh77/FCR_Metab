@@ -20,7 +20,7 @@ Next run the Scripts in the folder './Scripts/01_Data_Comp/'in the following ord
 Next run the following two scripts located in './Scripts/02_Metab_Model/' to calculate and QAQC metabolism rates 
 
 - 1a_metabFunction_FCR_EXO_18_22.R and 1b_metabFunction_FCR_wvwa_15_18.R are scripts that run the metabolism model for each time frame that the EXO or InsiteIG DO sensor was deployed. These scripts can be run in either order
-- calcZMixDens.R, fillHoles.R, metabLoss_v8.R, metabPredix_v.R, are all functions used to run the metabFunction scripts 
+- folder 'model_functions' contains four scripts: calcZMixDens.R, fillHoles.R, metabLoss_v8.R, metabPredix_v.R, that are functions used to run the metabFunction scripts 
 - 2_Metab_Outputs_QAQC.R compiles and QAQCs metab model outputs to be used in data analysis scripts
 
 
