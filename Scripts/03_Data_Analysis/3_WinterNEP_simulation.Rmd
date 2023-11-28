@@ -1,0 +1,243 @@
+---
+title: "WinterNEP_simulations"
+author: "Dexter Howard"
+date: "2023-10-16"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##Read in and tidy up data 
+
+```{r}
+library(tidyverse)
+library(ggpubr)
+metaboutput <- read.csv("../../Data/Model_Output/MetabOutput_QAQC_15_22_09jun23.csv")
+head(metaboutput)
+
+metaboutput1 <- metaboutput %>% 
+  filter(R_QAQC < 18) %>% #remove three high R and NEP values that have poor model fits 
+  select(solarDay, GPP_QAQC, R_QAQC, NEM_QAQC) %>% 
+  mutate(solarDay = ymd(solarDay))
+
+#read in seasons data frame 
+seasons_ts_operational <- read.csv("../../Data/Seasons_operational_Ice.csv")
+seasons_ts_operational$Date <- as.Date(seasons_ts_operational$Date)
+
+metab_seasons_operational <- left_join(seasons_ts_operational, metaboutput1, by = c("Date" = "solarDay")) %>% 
+  rename(corrected_Year = cor_Year)
+
+
+metab_seasons <- metab_seasons_operational %>% 
+  select(Date, Season, corrected_Year, icevector, GPP_QAQC, R_QAQC, NEM_QAQC)
+
+```
+
+
+## Determine seasons and winter NEPs per year 
+
+```{r}
+
+#get seasonal mean NEP for each year 
+seasons_NEPs <- metab_seasons %>%  
+  #filter(corrected_Year %in% c(2019,2021)) %>% 
+  filter(Season != "Winter") %>% 
+  group_by(Season, corrected_Year) %>% 
+  summarise(NEP_mean = mean(NEM_QAQC, na.rm = T)) 
+
+#get ice covered vs ice free mean NEP for each winter 
+winterNEPs <- metab_seasons %>% 
+  #filter(corrected_Year %in% c(2019,2021)) %>% 
+  filter(Season == "Winter") %>% 
+  mutate(icevector = ifelse(icevector == 1, "ON", "OFF")) %>% 
+  group_by(corrected_Year, Season, icevector) %>% 
+  summarise(NEP_mean = mean(NEM_QAQC, na.rm = T))
+
+
+#make data frame that assigns the mean to each day of the year for 2019-2021 (the years where we have a mean for each time period)
+
+Dates <- data.frame(Date = seq(ymd("2015-11-09"), ymd("2022-03-01"), by = "days" ))
+
+dates_df <- left_join(Dates, seasons_ts_operational, by = "Date") %>% 
+    mutate(icevector = ifelse(icevector == 1, "ON", "OFF"),
+           icevector = ifelse(Season == "Winter", icevector, NA)) %>% 
+  rename(corrected_Year = cor_Year) %>% 
+  select(Date, corrected_Year, Season, icevector)
+
+
+dates_df_A <- left_join(dates_df, seasons_NEPs, by = c("corrected_Year", "Season"))
+
+dates_df_B <- left_join(dates_df_A, winterNEPs, by = c("corrected_Year", "Season", "icevector")) 
+
+Dates_FIN <- dates_df_B %>% 
+  mutate(NEP = ifelse(is.na(NEP_mean.x), NEP_mean.y, NEP_mean.x)) %>% 
+  select(Date, corrected_Year, Season, icevector, NEP)
+
+```
+
+
+## Try putting all mutates in one chunk
+
+```{r}
+
+### identify days that are ice free already in each year 
+icefree2019 <- c(seq(ymd("2018-12-20"), ymd("2019-01-20"), by = "1 day"),
+                 seq(ymd("2019-01-24"), ymd("2019-01-26"), by = "1 day"),
+                 seq(ymd("2019-02-02"), ymd("2019-02-22"), by = "1 day"))
+
+icefree2021 <- c(seq(ymd("2020-12-20"), ymd("2020-12-26"), by = "1 day"),
+                 seq(ymd("2020-12-30"), ymd("2021-01-09"), by = "1 day"),
+                 ymd("2021-02-09"), ymd("2021-02-10"))
+
+##Set up vectors for different simulations adding ice cover back 
+icefree2019_40days <- c(seq(ymd("2018-12-20"), ymd("2019-01-20"), by = "1 day"),
+                 seq(ymd("2019-01-24"), ymd("2019-01-26"), by = "1 day"),
+                 seq(ymd("2019-02-02"), ymd("2019-02-06"), by = "1 day"))
+
+icefree2021_40days <- c(seq(ymd("2020-12-10"), ymd("2020-12-19"), by = "1 day"),
+                           icefree2021,
+                           seq(ymd("2021-02-23"), ymd("2021-03-04"), by = "1 day"))
+
+icefree2019_80days <- c( seq(ymd("2018-12-08"), ymd("2018-12-19"), by = "1 day"),
+                           icefree2019,
+                           seq(ymd("2019-02-23"), ymd("2019-03-06"), by = "1 day"))
+
+icefree2021_80days <- c( seq(ymd("2020-11-20"), ymd("2020-12-19"), by = "1 day"),
+                           icefree2021,
+                           seq(ymd("2021-02-23"), ymd("2021-03-24"), by = "1 day"))
+
+
+
+## Run simulations 
+metab_simulations_TEST <- Dates_FIN %>% 
+  mutate(
+    #1 day sims
+    NEP_1day = ifelse(Date == ymd("2018-12-20"), 0.1313906830, NEP),
+    NEP_1day = ifelse(Date == ymd("2020-12-20"), 0.02237530, NEP_1day),
+    
+    #5 day sims
+    NEP_5day = ifelse(Date %in% seq(ymd("2018-12-20"), ymd("2018-12-24"), by = "1 day"), 0.1313906830, NEP),
+    NEP_5day = ifelse(Date %in% seq(ymd("2020-12-20"), ymd("2020-12-24"), by = "1 day"), 0.02237530, NEP_5day),
+    
+    #10 day sims
+    NEP_10day = ifelse(Date %in% seq(ymd("2018-12-20"), ymd("2018-12-29"), by = "1 day"), 0.1313906830, NEP),
+    NEP_10day = ifelse(Date %in% seq(ymd("2020-12-31"), ymd("2021-01-09"), by = "1 day"), 0.02237530, NEP_10day),
+    
+    #20 day sims
+    NEP_20day = ifelse(Date %in% seq(ymd("2018-12-20"), ymd("2019-01-08"), by = "1 day"), 0.1313906830, NEP),
+    NEP_20day = ifelse(Date %in% icefree2021, 0.02237530, NEP_20day),
+    
+    #40 day sims
+    NEP_40day = ifelse(Date %in% icefree2019_40days, 0.1313906830, NEP),
+    NEP_40day = ifelse(Date %in% icefree2021_40days, 0.02237530, NEP_40day),
+
+    #80 day sims
+    NEP_80day = ifelse(Date %in% icefree2019_80days, 0.1313906830, NEP),
+    NEP_80day = ifelse(Date %in% icefree2021_80days, 0.02237530, NEP)
+
+  )
+
+
+#Get summary for NEP 0 - 20 days 
+results0to20 <- metab_simulations_TEST %>% 
+  select(Date, corrected_Year, Season, NEP, NEP_1day, NEP_5day, NEP_10day, NEP_20day) %>% 
+  filter(corrected_Year %in% c(2019,2021)) %>% 
+  group_by(corrected_Year) %>% 
+  summarise(NEP = mean(NEP),
+            NEP_1day = mean(NEP_1day),
+            NEP_5day = mean(NEP_5day),
+            NEP_10day = mean(NEP_10day),
+            NEP_20day = mean(NEP_20day) )
+
+results2019_40 <- metab_simulations_TEST %>% 
+  select(Date, corrected_Year, Season, NEP_40day) %>% 
+  filter(corrected_Year == 2019) %>%  
+  group_by(corrected_Year) %>% 
+  summarise(NEP_40day = mean(NEP_40day))
+
+
+results2021_40 <- metab_simulations_TEST %>% 
+  select(Date, corrected_Year, Season, NEP_40day) %>% 
+  filter(Date %in% seq(ymd("2020-12-10"), ymd("2021-12-09"), by = "1 day")) %>%  
+  summarise(NEP_40day = mean(NEP_40day)) %>% 
+  mutate(corrected_Year = 2021)
+
+results_40day <- rbind(results2019_40, results2021_40)
+
+results2019_80 <- metab_simulations_TEST %>% 
+  select(Date, corrected_Year, Season, NEP_80day) %>% 
+  filter(Date %in% seq(ymd("2018-12-08"), ymd("2019-12-07"), by = "1 day")) %>%  
+  summarise(NEP_80day = mean(NEP_80day)) %>% 
+  mutate(corrected_Year = 2019)
+
+results2021_80 <- metab_simulations_TEST %>% 
+  select(Date, corrected_Year, Season, NEP_80day) %>% 
+  filter(Date %in% seq(ymd("2020-11-20"), ymd("2021-11-19"), by = "1 day")) %>%  
+  summarise(NEP_80day = mean(NEP_80day)) %>% 
+  mutate(corrected_Year = 2021)
+
+results_80day <- rbind(results2019_80, results2021_80)
+
+results1 <- left_join(results0to20, results_40day, by = "corrected_Year")
+results2 <- left_join(results1, results_80day, by = "corrected_Year")
+
+
+
+#### stats
+
+###set up data frame 
+
+#0 to 20 days
+results0to20_K <- metab_simulations_TEST %>% 
+  select(Date, corrected_Year, Season, NEP, NEP_1day, NEP_5day, NEP_10day, NEP_20day) %>% 
+  filter(corrected_Year %in% c(2019,2021)) 
+
+results0to20_K <- results0to20_K[-c(1),]
+
+#40 days
+results2019_40_K <- metab_simulations_TEST %>% 
+  select(Date, corrected_Year, Season, NEP_40day) %>% 
+  filter(corrected_Year == 2019) 
+
+results2021_40_K <- metab_simulations_TEST %>% 
+  select(Date, corrected_Year, Season, NEP_40day) %>% 
+  filter(Date %in% seq(ymd("2020-12-10"), ymd("2021-12-09"), by = "1 day")) 
+
+results_40_K <- rbind(results2019_40_K, results2021_40_K)
+
+
+results2019_80_K <- metab_simulations_TEST %>% 
+  select(Date, corrected_Year, Season, NEP_80day) %>% 
+  filter(Date %in% seq(ymd("2018-12-08"), ymd("2019-12-07"), by = "1 day"))
+
+results2021_80_K <- metab_simulations_TEST %>% 
+  select(Date, corrected_Year, Season, NEP_80day) %>% 
+  filter(Date %in% seq(ymd("2020-11-20"), ymd("2021-11-19"), by = "1 day"))
+
+results_80_K <- rbind(results2019_80_K, results2021_80_K)
+
+
+
+k201921 <- data.frame(NEP = results0to20_K$NEP, NEP_one = results0to20_K$NEP_1day, NEP_five = results0to20_K$NEP_5day, NEP_ten = results0to20_K$NEP_10day, NEP_twenty = results0to20_K$NEP_20day, NEP_forty = results_40_K$NEP_40day, NEP_eighty = results_80_K$NEP_80day)
+k201921 <- k201921 %>% 
+  mutate(num = row_number())
+
+k201921long <- k201921 %>%  pivot_longer(-8)
+
+kruskal <- kruskal.test(value ~ name, data = k201921long)
+dunn <- FSA::dunnTest(value ~ name, data = k201921long)
+dunn_letters <- dunn$res
+dunn_letters_list <- rcompanion::cldList(comparison = dunn_letters$Comparison, p.value = dunn_letters$P.adj, threshold = 0.05)
+
+
+
+
+
+
+
+```
+
+
+

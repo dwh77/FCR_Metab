@@ -1,0 +1,506 @@
+---
+title: "FCR Metabolism Envi Drivers"
+author: "Dexter Howard"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Read in data and load packages 
+
+```{r}
+library(tidyverse)
+library(Hmisc) #rcorr
+library(corrplot) #corrplot
+library(ggpmisc) #statpoly line and eq
+library(MuMIn) #for dredge
+library(patchwork)
+
+```
+
+
+```{r}
+#### metab output 
+metaboutput <- read.csv("../../Data/Model_Output/MetabOutput_QAQC_15_22_22nov23.csv")
+
+metaboutput <- metaboutput %>% 
+  select(solarDay, GPP_QAQC, R_QAQC, NEM_QAQC) %>% 
+  mutate(solarDay = ymd(solarDay)) %>% 
+  dplyr::rename(Date = solarDay)
+
+#### Envi Drivers 
+#envidrivers <- read_csv("../../Data/EnviDrivers_daily_compiled_15_22_22nov23.csv")
+
+envidrivers_ZT <- read_csv("../../Data/EnviDrivers_ZT_daily_compiled_15_22_22nov23.csv")
+
+### Join Metab to envi drivers 
+#joined <- left_join(metab_seasons, envidrivers, by = c("Date" = "Date"))
+joined_ZT <- left_join(metaboutput, envidrivers_ZT, by = c("Date" = "Date"))
+
+
+
+```
+
+
+## Visualize data sets 
+
+```{r}
+#Histogram of data 
+# joined %>% 
+#   pivot_longer(c(5:21)) %>% 
+#   ggplot(aes(value))+
+#   geom_histogram()+
+#   facet_wrap(~name, scales = "free")
+
+joined_ZT %>% 
+  pivot_longer(c(5:21)) %>% 
+  ggplot(aes(value))+
+  geom_histogram()+
+  facet_wrap(~name, scales = "free")
+
+ 
+```
+
+## Make Spearman coorelation table 
+
+```{r}
+
+driverdata_corr <- joined_ZT %>% 
+  mutate(GPPlag = lag(GPP_QAQC,1),
+         Rlag = lag(R_QAQC,1),
+         NEMlag = lag(NEM_QAQC,1)) %>% 
+  # mutate(Month = month(Date),
+  #        JulianDOY = yday(Date)) %>% 
+  select(Date, GPP_QAQC, GPPlag, R_QAQC, Rlag, NEM_QAQC, NEMlag, everything()) %>% 
+  filter(  !if_any(c(NEM_QAQC, NEMlag), is.na)  ) %>% 
+  select(-Date) #remvoing date so rcorr runs below
+
+summary(driverdata_corr)
+
+cor_drivers <- rcorr(as.matrix(driverdata_corr), type = "spearman")
+spear_daily <- cor_drivers$r
+#write.csv(spear_daily, "../../Figures/Metab_daily_spear_cor_22nov23.csv")
+corrplot(spear_daily, method = "number")
+
+
+```
+
+
+## Make scatterplots to decide which variables to remove 
+
+```{r}
+
+##Run regressions to pick models 
+
+#remove co coorealted variables that spearman r > 0.5 or < -0.5
+#remove flow for all analyses, 
+#DOC and TN coorlated, remove DOC from GPP and TN from R and NEP
+#looked at plots below and decide to keep schmidt over airtemp for all daily
+#remove filt chla since high r w/ both TP and TN
+
+
+driverdata_corr %>% 
+  ggplot(aes(x = schmidt_ZT, y = GPP_QAQC))+ #also see TN_ugL, Kd
+  geom_point()+
+  stat_poly_line() +  stat_poly_eq() 
+
+driverdata_corr %>% 
+  ggplot(aes(x = E24_ZT, y = GPP_QAQC))+ #also see TN_ugL, Kd
+  geom_point()+
+  stat_poly_line() +  stat_poly_eq() 
+
+driverdata_corr %>% 
+  ggplot(aes(x = schmidt_ZT, y = R_QAQC))+ #also see TN_ugL, Kd
+  geom_point()+
+  stat_poly_line() +  stat_poly_eq() 
+
+driverdata_corr %>% 
+  ggplot(aes(x = airtemp_ZT, y = R_QAQC))+ #also see TN_ugL, Kd
+  geom_point()+
+  stat_poly_line() +  stat_poly_eq() 
+
+driverdata_corr %>% 
+  ggplot(aes(x = schmidt_ZT, y = NEM_QAQC))+ #also see TN_ugL, Kd
+  geom_point()+
+  stat_poly_line() +  stat_poly_eq() 
+
+driverdata_corr %>% 
+  ggplot(aes(x = airtemp_ZT, y = NEM_QAQC))+ #also see TN_ugL, Kd
+  geom_point()+
+  stat_poly_line() +  stat_poly_eq() 
+
+
+```
+
+
+
+
+## AR daily models 
+
+```{r}
+
+## set up data frame without NAs so AR model will run
+driverdata_corr_gpp <- driverdata_corr %>% 
+  select(GPP_QAQC, GPPlag, NEM_QAQC, NEMlag, rain_ZT, TN_ZT, TP_ZT, 
+          SRP_ZT, NO3NO2_ZT, NH4_ZT, E24_ZT)
+
+daily_AR_gpp <- na.omit(driverdata_corr_gpp)
+
+driverdata_corr_r_nep <- driverdata_corr %>% 
+  select(R_QAQC, Rlag, NEM_QAQC, NEMlag, rain_ZT, DOC_ZT, TP_ZT, 
+          SRP_ZT, NO3NO2_ZT, NH4_ZT, E24_ZT)
+
+daily_AR_r_nep <- na.omit(driverdata_corr_r_nep)
+
+
+# Daily GPP global model
+model_dailyGPP_fin <- glm(GPP_QAQC ~ GPPlag   + rain_ZT  + 
+                     TN_ZT + TP_ZT +  SRP_ZT  + NO3NO2_ZT + NH4_ZT + E24_ZT, 
+                  data = daily_AR_gpp, family = gaussian, na.action = 'na.fail') 
+
+summary(model_dailyGPP_fin)
+
+glm_dailyGPP <- dredge(model_dailyGPP_fin, rank = "AICc", fixed = "GPPlag") 
+
+
+# topGPPtest <- glm(GPP_QAQC ~ GPPlag   +  SRP_ZT  + NO3NO2_ZT, 
+#                   data = daily_AR_gpp, family = gaussian, na.action = 'na.fail') 
+# 
+# summary(topGPPtest)
+# 
+# glm_topGPPtest <- dredge(topGPPtest, rank = "AICc", fixed = "GPPlag") 
+
+
+
+
+# Daily R global model
+
+model_dailyR_fin <- glm(R_QAQC ~ Rlag   + rain_ZT  + 
+                     TP_ZT +   DOC_ZT  + SRP_ZT  + NO3NO2_ZT + NH4_ZT  +  E24_ZT, 
+                  data = daily_AR_r_nep, family = gaussian, na.action = 'na.fail') 
+
+summary(model_dailyR_fin)
+
+glm_dailyR <- dredge(model_dailyR_fin, rank = "AICc", fixed = "Rlag") 
+
+
+
+# Daily NEP global model
+model_dailyNEP_fin <- glm(NEM_QAQC ~ NEMlag  + rain_ZT  + 
+                     TP_ZT + DOC_ZT  + SRP_ZT  + NO3NO2_ZT + NH4_ZT  + E24_ZT, 
+                  data = daily_AR_r_nep, family = gaussian, na.action = 'na.fail') 
+
+summary(model_dailyNEP_fin)
+
+glm_dailyNEP <- dredge(model_dailyNEP_fin, rank = "AICc", fixed = "NEMlag") 
+
+
+```
+
+## Daily plot 
+
+```{r}
+
+### GPP
+summary(model_dailyGPP_fin)
+
+ggpdailytable <- as.data.frame(glm_dailyGPP)
+
+#ggp_daily_drivers <- 
+  
+GPPdaily_fig <- ggpdailytable %>% 
+  mutate(variable = "GPP") %>% 
+  select(variable, 2:9) %>% 
+  rename(TP = TP_ZT, TN = TN_ZT, SRP = SRP_ZT, Precip = rain_ZT, NO3 = NO3NO2_ZT, NH4 = NH4_ZT, E24 = E24_ZT) %>% 
+  pivot_longer(-1) %>% 
+  filter(name != "GPPlag") %>% 
+  mutate(Sig = ifelse(name %in% c("GPPlag", "TN", "SRP"), "Significant", "Not Significant")) %>%
+  ggplot(aes(x = value, y = name, color = Sig))+
+  geom_jitter()+
+  geom_boxplot(alpha = 0.8)+
+  labs(x = "coefficient value", y = "Variable", title = "GPP daily")+
+  xlim(-1.2, 1.2)+
+  theme_bw(base_size = 18)+
+    theme(legend.position = "top")+
+  geom_vline(aes(xintercept = 0))+
+  scale_color_manual(values = c("gray", "red"))
+
+GPPdaily_fig
+
+### R
+summary(model_dailyR_fin)
+
+Rdailytable <- as.data.frame(glm_dailyR)
+
+  
+Rdaily_fig <-Rdailytable %>% 
+  mutate(variable = "R") %>% 
+  select(variable, 2:9) %>% 
+  rename(TP = TP_ZT, SRP = SRP_ZT, Precip = rain_ZT, NO3 = NO3NO2_ZT, NH4 = NH4_ZT, E24 = E24_ZT, DOC = DOC_ZT) %>% 
+  pivot_longer(-1) %>% 
+    mutate(Sig = ifelse(name %in% c(), "Significant", "Not Significant")) %>%
+    filter(name != "Rlag") %>% 
+  ggplot(aes(x = value, y = name, color = Sig))+
+  geom_jitter()+
+  geom_boxplot(alpha = 0.8)+
+  labs(x = "coefficient value", y = "Variable", title = "R daily")+
+  xlim(-1.2, 1.2)+
+  theme_bw(base_size = 18)+
+    theme(legend.position = "none")+
+  geom_vline(aes(xintercept = 0))+
+  scale_color_manual(values = c("gray", "red"))
+
+Rdaily_fig
+
+### NEP
+summary(model_dailyNEP_fin)
+
+NEPdailytable <- as.data.frame(glm_dailyNEP)
+
+  
+NEPdaily_fig <- NEPdailytable %>% 
+  mutate(variable = "NEP") %>% 
+  select(variable, 2:9) %>%
+  rename(TP = TP_ZT, SRP = SRP_ZT, Precip = rain_ZT, NO3 = NO3NO2_ZT, NH4 = NH4_ZT, E24 = E24_ZT, DOC = DOC_ZT) %>% 
+  pivot_longer(-1) %>% 
+  filter(name != "NEMlag") %>% 
+  #mutate(Sig = ifelse(name %in% c("NEMlag", "Precip", "NO3", "TP", "DOC", "SRP", "NH4"), "Significant", "Not Significant")) %>%
+  mutate(Sig = ifelse(name %in% c(), "Significant", "Not Significant")) %>%
+  ggplot(aes(x = value, y = name, color = Sig))+
+  geom_jitter()+
+  geom_boxplot(alpha = 0.8)+
+  labs(x = "coefficient value", y = "Variable", title = "NEP daily")+
+  #geom_dotplot()+
+  #stat_summary(fun.data = "mean_sd1", fun.args = list(mult=1), geom = "pointrange", color = "red")+
+  xlim(-1.2, 1.2)+
+  theme_bw(base_size = 18)+
+    theme(legend.position = "none")+
+  geom_vline(aes(xintercept = 0))+
+  scale_color_manual(values = c("gray", "red"))
+
+NEPdaily_fig
+
+
+
+#### Make final figure 
+(GPPdaily_fig / Rdaily_fig / NEPdaily_fig) 
+
+dailydrivers <- (GPPdaily_fig | Rdaily_fig | NEPdaily_fig) 
+
+ggsave(filename = "../../Figures/MS_final/EnviDrivers_Fig5_updated.png",
+       dailydrivers, device = "png", width = 350, height = 100, units = "mm")
+
+
+```
+
+
+
+
+####### OLD SPARE CODE, can ignore for now #####################
+
+
+## Daily GPP - N exploration 
+
+```{r}
+# Daily GPP global model
+model_dailyGPP_all <- glm(GPP_QAQC ~ GPPlag + airtemp_ZT  + rain_ZT  + #rain_lag1_ZT + rain_lag2_ZT + 
+                    EXO_fdom_ZT  + EXO_chla_ZT + flow_ZT + TN_ZT + TP_ZT + 
+                    DOC_ZT  + SRP_ZT  + NO3NO2_ZT + NH4_ZT  + Kd_ZT + E24_ZT + schmidt_ZT + filt_chla_ZT,
+                  data = daily_AR, family = gaussian, na.action = 'na.fail')
+
+
+model_dailyGPP_fin_noEXO <- glm(GPP_QAQC ~ GPPlag   + rain_ZT  + 
+                     TN_ZT + TP_ZT +  SRP_ZT  + NO3NO2_ZT + NH4_ZT + E24_ZT, #+ schmidt_ZT,
+                  data = daily_AR, family = gaussian, na.action = 'na.fail') 
+
+summary(model_dailyGPP_fin_noEXO)
+
+glm_dailyGPP_noEXO <- dredge(model_dailyGPP_fin_noEXO, rank = "AICc", fixed = "GPPlag") 
+
+
+#Tests
+model_dailyGPP_chem <- glm(GPP_QAQC ~ GPPlag + TN_ZT + TP_ZT + 
+                    DOC_ZT  + SRP_ZT  + NO3NO2_ZT + NH4_ZT,
+                  data = daily_AR, family = gaussian, na.action = 'na.fail')
+
+glm_dailyGPP_chem <- dredge(model_dailyGPP_chem, rank = "AICc", fixed = "GPPlag") 
+
+model_dailyGPP_N <- glm(GPP_QAQC ~ GPPlag + TN_ZT  + NO3NO2_ZT + NH4_ZT,
+                  data = daily_AR, family = gaussian, na.action = 'na.fail')
+
+glm_dailyGPP_N <- dredge(model_dailyGPP_N, rank = "AICc", fixed = "GPPlag") 
+
+model_dailyGPP_NO3 <- glm(GPP_QAQC ~ GPPlag   + NO3NO2_ZT ,
+                  data = daily_AR, family = gaussian, na.action = 'na.fail')
+
+glm_dailyGPP_NO3 <- dredge(model_dailyGPP_NO3, rank = "AICc", fixed = "GPPlag") 
+
+
+
+
+```
+
+
+
+## Daily R - DOC exploration 
+
+```{r}
+#### Daily R global model from previous chunk
+
+#all variables - not removing the co-coorealted variables 
+model_dailyR_all <- glm(R_QAQC ~ Rlag + airtemp_ZT  + rain_ZT  + # rain_lag1_ZT + rain_lag2_ZT + 
+                    EXO_fdom_ZT  + EXO_chla_ZT + flow_ZT + TN_ZT + TP_ZT + 
+                    DOC_ZT  + SRP_ZT  + NO3NO2_ZT + NH4_ZT  + Kd_ZT + schmidt_ZT + filt_chla_ZT,
+                  data = daily_AR, family = gaussian, na.action = 'na.fail')
+
+#removing cocoorelated 
+model_dailyR_fin <- glm(R_QAQC ~ Rlag   + rain_ZT  + # rain_lag1_ZT + rain_lag2_ZT + 
+                    EXO_fdom_ZT  + EXO_chla_ZT   + TP_ZT + 
+                    DOC_ZT  + SRP_ZT  + NO3NO2_ZT + NH4_ZT  + Kd_ZT + schmidt_ZT,
+                  data = daily_AR, family = gaussian, na.action = 'na.fail') 
+
+glm_dailyR <- dredge(model_dailyR_fin, rank = "AICc", fixed = "Rlag") 
+
+#also removing EXO variables 
+model_dailyR_fin_noEXO <- glm(R_QAQC ~ Rlag   + rain_ZT  + # rain_lag1_ZT + rain_lag2_ZT + 
+                     TP_ZT +   DOC_ZT  + SRP_ZT  + NO3NO2_ZT + NH4_ZT  + Kd_ZT + schmidt_ZT,
+                  data = daily_AR, family = gaussian, na.action = 'na.fail') 
+
+
+glm_dailyR_noEXO <- dredge(model_dailyR_fin_noEXO, rank = "AICc", fixed = "Rlag") 
+
+
+#### Testing combos to see what may cause negative DOC 
+
+model_dailyR_fin_noEXO_TEST1 <- glm(R_QAQC ~ Rlag   + rain_ZT  + 
+                     TP_ZT +   DOC_ZT  + SRP_ZT  + # NO3NO2_ZT + NH4_ZT  + ## Getting rid of both or either of N variables doesnt change DOC relationship
+                       Kd_ZT + schmidt_ZT,
+                  data = daily_AR, family = gaussian, na.action = 'na.fail') 
+
+
+glm_dailyR_noEXO_TEST1 <- dredge(model_dailyR_fin_noEXO_TEST1, rank = "AICc", fixed = "Rlag") 
+
+
+model_dailyR_fin_noEXO_TEST2 <- glm(R_QAQC ~ Rlag   + rain_ZT  + 
+                       DOC_ZT    + NO3NO2_ZT + NH4_ZT  + # no P or combo of Ps change DOC relationship 
+                       Kd_ZT + schmidt_ZT,
+                  data = daily_AR, family = gaussian, na.action = 'na.fail') 
+
+
+glm_dailyR_noEXO_TEST2 <- dredge(model_dailyR_fin_noEXO_TEST2, rank = "AICc", fixed = "Rlag") 
+
+
+model_dailyR_fin_noEXO_TEST3 <- glm(R_QAQC ~ Rlag  + rain_ZT  + 
+                       DOC_ZT  +  Kd_ZT + schmidt_ZT,          #no nutrients 
+                  data = daily_AR, family = gaussian, na.action = 'na.fail') 
+
+
+glm_dailyR_noEXO_TEST3 <- dredge(model_dailyR_fin_noEXO_TEST3, rank = "AICc", fixed = "Rlag") 
+
+
+model_dailyR_fin_noEXO_TEST4 <- glm(R_QAQC ~ Rlag +  DOC_ZT ,         
+                  data = daily_AR, family = gaussian, na.action = 'na.fail') 
+
+
+glm_dailyR_noEXO_TEST4 <- dredge(model_dailyR_fin_noEXO_TEST4, rank = "AICc", fixed = "Rlag") 
+
+model_dailyR_fin_noEXO_TEST5 <- glm(R_QAQC ~ Rlag   + rain_ZT  + 
+                      DOC_ZT  +  Kd_ZT + schmidt_ZT,    ## When schmidt gets added it changes from slightly negative to stronger negative DOC 
+                  data = daily_AR, family = gaussian, na.action = 'na.fail') 
+
+glm_dailyR_noEXO_TEST5 <- dredge(model_dailyR_fin_noEXO_TEST5, rank = "AICc", fixed = "Rlag") 
+
+
+
+```
+
+
+
+
+
+
+
+## DOC, EEMs, CHla, NO3, NH4
+
+```{r}
+### read in data and subset 
+chem <- read.csv("../../Data/EDI2023/FCR_chem_2022.csv")
+
+chla <- read.csv("../../Data/EDI2023/manual_chlorophyll_2014_2022.csv")
+
+eems <- read.csv("C:/Users/dwh18/Downloads/20210511_OpticalData.csv")
+
+chemA <- chem %>% 
+    filter(Reservoir == "FCR",
+         Site == 50,
+         Depth_m %in% c(0.1, 1.6)) %>% 
+  select(DateTime, Depth_m, NO3NO2_ugL, NH4_ugL, DOC_mgL) %>%   
+  mutate(DateTime = as.Date(DateTime))
+
+
+eemsA <- eems %>% 
+  filter(Reservoir == "FCR",
+         Site == 50,
+         Depth_m == 0.1) %>% 
+  select(DateTime, Depth_m, HIX, BIX) %>% 
+    mutate(DateTime = as.Date(DateTime)) 
+
+chlaA <- chla %>% 
+    filter(Reservoir == "FCR",
+         Site == 50,
+         Depth_m %in% c(0.1, 1.6)) %>% 
+  select(DateTime, Depth_m, Chla_ugL) %>% 
+    mutate(DateTime = as.Date(DateTime)) 
+  
+
+### compare NO3 to NH4
+chemA %>% 
+  filter(Depth_m == 1.6) %>% 
+  # filter(DateTime > ymd("2019-01-01"),
+  #        DateTime < ymd("2020-01-01")) %>% 
+  select(DateTime, NO3NO2_ugL, NH4_ugL) %>% 
+  pivot_longer(-1) %>% 
+  ggplot(aes(x = DateTime, y = value, color = name))+
+  geom_point()+
+  geom_line()+
+  ylim(0,50)+
+  theme_bw()
+
+chemA %>% 
+  filter(Depth_m == 1.6) %>% 
+  filter(NO3NO2_ugL < 100) %>% 
+  # filter(DateTime > ymd("2019-01-01"),
+  #        DateTime < ymd("2020-01-01")) %>% 
+  ggplot(aes(x = NO3NO2_ugL, y = NH4_ugL))+
+  geom_point()+
+  stat_poly_line() +  stat_poly_eq() 
+
+
+
+### compare DOC, HIX, BIX, chla 
+doc_eem_chla <- left_join(eemsA, chemA, by = c("DateTime", "Depth_m"))
+doc_eem_chla <- left_join(doc_eem_chla, chlaA, by = c("DateTime", "Depth_m"))
+
+doc_eem_chla %>% 
+  select(-NO3NO2_ugL, -NH4_ugL, - Depth_m) %>% 
+  pivot_longer(-1) %>% 
+  ggplot(aes(x= DateTime, y = value))+
+  geom_point()+
+  facet_wrap(~name, ncol = 1, scales = "free_y")+
+  theme_bw()
+  
+
+```
+
+
+
+
+
+
+
+
+
+
+

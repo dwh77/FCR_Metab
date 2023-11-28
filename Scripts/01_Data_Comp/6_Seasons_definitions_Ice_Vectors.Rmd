@@ -1,0 +1,339 @@
+---
+title: "Seasons_Defined"
+author: "Dexter Howard"
+date: "9/29/2022"
+output: html_document
+---
+
+## Load in packages 
+```{r}
+library(tidyverse)
+
+thermal_metrics <- read.csv("../../Data/thermalmetric_calcs.csv")
+
+ice <- read_csv("../../Data/EDI2023/Ice_Data_2013_2022.csv")
+ice <- ice %>% 
+  filter(Reservoir == "FCR")
+
+#I then manually looked through the ice and thermal metrics data frames to determine days that had ice cover (those time periods are defined in the chunk starting on line 23) and periods of thermal stratification using at 0.1 kg m^-3 thershold of difference from 1m to 8m depth (column Strat_Dens_0.1), where the start of stratification in a year was defined as the first day that the threshold was greater than 0.1 ("Strat") and remained that for at least 14 days, and stratificiation ended the first day that the threshold was less than 0.1 ("Not_Strat")
+
+```
+
+
+##Make data frames to define seasons - operation winter, thermal summer
+
+```{r}
+###make Seasons here 
+#Winter
+winter16 <- as.data.frame(seq(ymd("2015-12-20"), ymd("2016-02-22"), by = "days" ))
+colnames(winter16)[1] <- "Date"
+winter16$corrected_Year <- 2016
+winter17 <- as.data.frame(seq(ymd("2016-12-20"), ymd("2017-02-22"), by = "days" ))
+colnames(winter17)[1] <- "Date"
+winter17$corrected_Year <- 2017
+winter18 <- as.data.frame(seq(ymd("2017-12-20"), ymd("2018-02-22"), by = "days" ))
+colnames(winter18)[1] <- "Date"
+winter18$corrected_Year <- 2018
+winter19 <- as.data.frame(seq(ymd("2018-12-20"), ymd("2019-02-22"), by = "days" ))
+colnames(winter19)[1] <- "Date"
+winter19$corrected_Year <- 2019
+winter20 <- as.data.frame(seq(ymd("2019-12-20"), ymd("2020-02-22"), by = "days" ))
+colnames(winter20)[1] <- "Date"
+winter20$corrected_Year <- 2020
+winter21 <- as.data.frame(seq(ymd("2020-12-20"), ymd("2021-02-22"), by = "days" ))
+colnames(winter21)[1] <- "Date"
+winter21$corrected_Year <- 2021
+winter22 <- as.data.frame(seq(ymd("2021-12-20"), ymd("2022-02-22"), by = "days" ))
+colnames(winter22)[1] <- "Date"
+winter22$corrected_Year <- 2022
+winter <- rbind(winter16, winter17, winter18, winter19, winter20, winter21, winter22)
+winter$Season <- "Winter"
+
+#Summer
+summer16 <- as.data.frame(seq(ymd("2016-03-09"), ymd("2016-10-13"), by = "days" ))
+colnames(summer16)[1] <- "Date"
+summer17 <- as.data.frame(seq(ymd("2017-03-25"), ymd("2017-10-24"), by = "days" ))
+colnames(summer17)[1] <- "Date"
+summer18 <- as.data.frame(seq(ymd("2018-03-20"), ymd("2018-10-21"), by = "days" ))
+colnames(summer18)[1] <- "Date"
+summer19 <- as.data.frame(seq(ymd("2019-03-25"), ymd("2019-11-01"), by = "days" ))
+colnames(summer19)[1] <- "Date"
+summer20 <- as.data.frame(seq(ymd("2020-03-11"), ymd("2020-11-01"), by = "days" ))
+colnames(summer20)[1] <- "Date"
+summer21 <- as.data.frame(seq(ymd("2021-03-17"), ymd("2021-11-02"), by = "days" ))
+colnames(summer21)[1] <- "Date"
+summer <- rbind(summer16, summer17, summer18, summer19, summer20, summer21)
+summer$Season <- "Summer"
+summer$corrected_Year <- year(summer$Date)
+
+
+#Spring
+spring16 <- as.data.frame(seq(ymd("2016-02-23"), ymd("2016-03-08"), by = "days" ))
+colnames(spring16)[1] <- "Date"
+spring17 <- as.data.frame(seq(ymd("2017-02-23"), ymd("2017-03-24"), by = "days" ))
+colnames(spring17)[1] <- "Date"
+spring18 <- as.data.frame(seq(ymd("2018-02-23"), ymd("2018-03-19"), by = "days" ))
+colnames(spring18)[1] <- "Date"
+spring19 <- as.data.frame(seq(ymd("2019-02-23"), ymd("2019-03-24"), by = "days" ))
+colnames(spring19)[1] <- "Date"
+spring20 <- as.data.frame(seq(ymd("2020-02-23"), ymd("2020-03-10"), by = "days" ))
+colnames(spring20)[1] <- "Date"
+spring21 <- as.data.frame(seq(ymd("2021-02-23"), ymd("2021-03-16"), by = "days" ))
+colnames(spring21)[1] <- "Date"
+spring <- rbind(spring16, spring17, spring18, spring19, spring20, spring21)
+spring$Season <- "Spring"
+spring$corrected_Year <- year(spring$Date)
+
+
+#Fall
+fall15 <- as.data.frame(seq(ymd("2015-11-08"), ymd("2015-12-19"), by = "days" ))
+colnames(fall15)[1] <- "Date"
+fall16 <- as.data.frame(seq(ymd("2016-10-14"), ymd("2016-12-19"), by = "days" ))
+colnames(fall16)[1] <- "Date"
+fall17 <- as.data.frame(seq(ymd("2017-10-25"), ymd("2017-12-19"), by = "days" ))
+colnames(fall17)[1] <- "Date"
+fall18 <- as.data.frame(seq(ymd("2018-10-22"), ymd("2018-12-19"), by = "days" ))
+colnames(fall18)[1] <- "Date"
+fall19 <- as.data.frame(seq(ymd("2019-11-02"), ymd("2019-12-19"), by = "days" ))
+colnames(fall19)[1] <- "Date"
+fall20 <- as.data.frame(seq(ymd("2020-11-02"), ymd("2020-12-19"), by = "days" ))
+colnames(fall20)[1] <- "Date"
+fall21 <- as.data.frame(seq(ymd("2021-11-03"), ymd("2021-12-19"), by = "days" ))
+colnames(fall21)[1] <- "Date"
+fall <- rbind(fall15, fall16, fall17, fall18, fall19, fall20, fall21)
+fall$Season <- "Fall"
+fall$corrected_Year <- year(fall$Date)
+
+#Put all seasons together 
+seasons_ts <- rbind(fall, spring, summer, winter)
+seasons_ts <- dplyr::arrange(seasons_ts, Date)
+```
+
+
+##Read in Ice data and make ice on data frame 
+```{r}
+
+##ice dotted lines plot 
+#2014
+ice2014 <- data.frame(Date = seq(as.Date("2013-12-01"), as.Date("2014-03-31"), by="day"))
+ice2014dates <- c(seq(as.Date("2014-01-06"), as.Date("2014-01-14"), by="day"), seq(as.Date("2014-01-28"), as.Date("2014-02-22"), by="day"))
+ice2014$icevector <- ifelse(ice2014$Date %in% ice2014dates, 1, 0)
+ice2014$julianDOY <- format(ice2014$Date, "%j")
+ice2014$Days_since_1Dec <- c(0:(nrow(ice2014)-1))
+
+#2015
+ice2015 <- data.frame(Date = seq(as.Date("2014-12-01"), as.Date("2015-03-31"), by="day"))
+ice2015dates <- c(seq(as.Date("2015-01-08"), as.Date("2015-01-29"), by="day"), seq(as.Date("2015-02-14"), as.Date("2015-03-12"), by="day"))
+ice2015$icevector <- ifelse(ice2015$Date %in% ice2015dates, 1, 0)
+ice2015$julianDOY <- format(ice2015$Date, "%j")
+ice2015$Days_since_1Dec <- c(0:(nrow(ice2015)-1))
+
+#2016
+ice2016 <- data.frame(Date = seq(as.Date("2015-12-01"), as.Date("2016-03-31"), by="day"))
+ice2016dates <- c(seq(as.Date("2016-01-21"), as.Date("2016-02-21"), by="day"))
+ice2016$icevector <- ifelse(ice2016$Date %in% ice2016dates, 1, 0)
+ice2016$julianDOY <- format(ice2016$Date, "%j")
+ice2016$Days_since_1Dec <- c(0:(nrow(ice2016)-1))
+
+#2017
+ice2017 <- data.frame(Date = seq(as.Date("2016-12-01"), as.Date("2017-03-31"), by="day"))
+ice2017dates <- c(as.Date("2016-12-20") , as.Date("2017-01-08"), as.Date("2017-01-13"))
+ice2017$icevector <- ifelse(ice2017$Date %in% ice2017dates, 1, 0)
+ice2017$julianDOY <- format(ice2017$Date, "%j")
+ice2017$Days_since_1Dec <- c(0:(nrow(ice2017)-1))
+
+#2018
+ice2018 <- data.frame(Date = seq(as.Date("2017-12-01"), as.Date("2018-03-31"), by="day"))
+ice2018dates <- c(seq(as.Date("2017-12-28"), as.Date("2018-01-08"), by="day"))
+ice2018$icevector <- ifelse(ice2018$Date %in% ice2018dates, 1, 0)
+ice2018$julianDOY <- format(ice2018$Date, "%j")
+ice2018$Days_since_1Dec <- c(0:(nrow(ice2018)-1))
+
+#2019
+ice2019 <- data.frame(Date = seq(as.Date("2018-12-01"), as.Date("2019-03-31"), by="day"))
+ice2019dates <- c(seq(as.Date("2019-01-21"), as.Date("2019-01-23"), by="day"), seq(as.Date("2019-01-27"), as.Date("2019-02-01"), by="day"))
+ice2019$icevector <- ifelse(ice2019$Date %in% ice2019dates, 1, 0)
+ice2019$julianDOY <- format(ice2019$Date, "%j")
+ice2019$Days_since_1Dec <- c(0:(nrow(ice2019)-1))
+
+
+#2020
+ice2020 <- data.frame(Date = seq(as.Date("2019-12-01"), as.Date("2020-03-31"), by="day"))
+ice2020$icevector <- 0
+ice2020$julianDOY <- format(ice2020$Date, "%j")
+ice2020$Days_since_1Dec <- c(0:(nrow(ice2020)-1))
+
+
+#2021
+ice2021 <- data.frame(Date = seq(as.Date("2020-12-01"), as.Date("2021-03-31"), by="day"))
+ice2021dates <- c(seq(as.Date("2020-12-27"), as.Date("2020-12-29"), by="day"), 
+                  seq(as.Date("2021-01-10"), as.Date("2021-02-08"), by="day"), 
+                  seq(as.Date("2021-02-11"), as.Date("2021-02-22"), by="day"))
+ice2021$icevector <- ifelse(ice2021$Date %in% ice2021dates, 1, 0)
+ice2021$julianDOY <- format(ice2021$Date, "%j")
+ice2021$Days_since_1Dec <- c(0:(nrow(ice2021)-1))
+
+#2022
+ice2022 <- data.frame(Date = seq(as.Date("2021-12-01"), as.Date("2022-03-31"), by="day"))
+ice2022dates <- c( seq(as.Date("2022-01-11"), as.Date("2022-01-13"), by="day"),
+                   seq(as.Date("2022-01-16"), as.Date("2022-02-09"), by="day"))
+ice2022$icevector <- ifelse(ice2022$Date %in% ice2022dates, 1, 0)
+ice2022$julianDOY <- format(ice2022$Date, "%j")
+ice2022$Days_since_1Dec <- c(0:(nrow(ice2022)-1))
+
+#making the plot
+binded_icedata <- rbind(ice2014, ice2015, ice2016, ice2017, ice2018, ice2019, ice2020, ice2021, ice2022)
+
+
+
+```
+
+##bind seasons to ice dates 
+
+```{r}
+head(binded_icedata)
+head(seasons_ts)
+
+joined_seasons_ice <- left_join(seasons_ts, binded_icedata, by = "Date")
+
+write.csv(joined_seasons_ice, "../../Data/Seasons_Ice_corrected_groupings.csv", row.names = F)
+```
+
+## Make equinox classifications 
+
+```{r}
+timeframe <- data.frame(Date = seq(ymd("2015-11-05"), ymd("2022-03-01"), by = "1 day"))
+
+#have each seasons start on 21st - Winter on 21 Dec, Spring on 21 Mar, Summer on 21 Jun, and Fall on 21 Sep
+solar_seasons <- timeframe %>% 
+  mutate(Julian = yday(Date),
+         Season = ifelse(Julian >= 80 & Julian <= 171, "Spring", NA),
+         Season = ifelse(Julian >= 172 & Julian <= 263, "Summer", Season),
+         Season = ifelse(Julian >= 264 & Julian <= 354, "Fall", Season),
+         Season = ifelse(Julian >= 355 | Julian <= 79, "Winter", Season)
+         ) %>% 
+  mutate(cor_Year = ifelse(Julian >= 355, (year(Date)+1), year(Date) )) #shifting year to start at start of winter
+
+solar_seasonsA <- left_join(solar_seasons, binded_icedata, by = "Date") %>% 
+  select(1:5) %>% 
+  mutate(icevector = ifelse(is.na(icevector), 0, icevector))
+
+
+write.csv(solar_seasonsA, "../../Data/Seasons_solar_Ice.csv", row.names = F)
+
+
+```
+
+## Operational summer and winter 
+
+```{r}
+
+timeframe <- data.frame(Date = seq(ymd("2015-11-05"), ymd("2022-03-01"), by = "1 day"))
+
+#have summer and winter be operational
+#winter earliest to latest date of ice observed in TS (20dec - 22feb) 
+#summer earliest day of strat to latest day of strat in TS (9mar - 2nov)
+
+operational_seasons <- timeframe %>% 
+  mutate(Julian = yday(Date),
+         Season = ifelse(Julian >= 54 & Julian <= 68, "Spring", NA),
+         Season = ifelse(Julian >= 69 & Julian <= 307, "Summer", Season),
+         Season = ifelse(Julian >= 308 & Julian <= 353, "Fall", Season),
+         Season = ifelse(Julian >= 354 | Julian <= 53, "Winter", Season)
+         ) %>% 
+  mutate(cor_Year = ifelse(Julian >= 354, (year(Date)+1), year(Date) )) #shifting year to start at start of winter
+
+operational_seasonsA <- left_join(operational_seasons, binded_icedata, by = "Date") %>% 
+  select(1:5) %>% 
+  mutate(icevector = ifelse(is.na(icevector), 0, icevector))
+
+write.csv(operational_seasonsA, "../../Data/Seasons_operational_Ice.csv", row.names = F)
+
+
+
+
+```
+
+##Make data frames to define seasons - winter based on ice not operational above 
+
+```{r}
+## 2016
+fall16 <- data.frame(Date = seq(ymd("2015-10-14"), ymd("2016-01-20"), by = "days"), 
+                     Season = "Fall", cor_Year = 2016)
+winter16 <- data.frame(Date = seq(ymd("2016-01-21"), ymd("2016-02-21"), by = "days"), 
+                       Season = "Winter", cor_Year = 2016)
+spring16 <- data.frame(Date = seq(ymd("2016-02-22"), ymd("2016-03-08"), by = "days"), 
+                       Season = "Spring", cor_Year = 2016)
+summer16 <- data.frame(Date = seq(ymd("2016-03-09"), ymd("2016-10-13"), by = "days"), 
+                       Season = "Summer", cor_Year = 2016)
+phys2016 <- rbind(fall16, winter16, spring16, summer16)
+
+#2017
+fall17 <- data.frame(Date = seq(ymd("2016-10-25"), ymd("2016-12-19"), by = "days"), 
+                     Season = "Fall", cor_Year = 2017)
+winter17 <- data.frame(Date = seq(ymd("2016-12-20"), ymd("2017-01-13"), by = "days"), 
+                       Season = "Winter", cor_Year = 2017)
+spring17 <- data.frame(Date = seq(ymd("2017-01-14"), ymd("2017-03-24"), by = "days"), 
+                       Season = "Spring", cor_Year = 2017)
+summer17 <- data.frame(Date = seq(ymd("2017-03-25"), ymd("2017-10-24"), by = "days"), 
+                       Season = "Summer", cor_Year = 2017)
+phys2017 <- rbind(fall17, winter17, spring17, summer17)
+
+#2018
+fall18 <- data.frame(Date = seq(ymd("2017-10-22"), ymd("2017-12-27"), by = "days"), 
+                     Season = "Fall", cor_Year = 2018)
+winter18 <- data.frame(Date = seq(ymd("2017-12-28"), ymd("2018-01-08"), by = "days"), 
+                       Season = "Winter", cor_Year = 2018)
+spring18 <- data.frame(Date = seq(ymd("2018-01-09"), ymd("2018-03-19"), by = "days"), 
+                       Season = "Spring", cor_Year = 2018)
+summer18 <- data.frame(Date = seq(ymd("2018-03-20"), ymd("2018-10-21"), by = "days"), 
+                       Season = "Summer", cor_Year = 2018)
+phys2018 <- rbind(fall18, winter18, spring18, summer18)
+
+#2019 
+fall19 <- data.frame(Date = seq(ymd("2018-11-02"), ymd("2019-01-20"), by = "days"), 
+                     Season = "Fall", cor_Year = 2019)
+winter19 <- data.frame(Date = seq(ymd("2019-01-21"), ymd("2019-02-01"), by = "days"), 
+                       Season = "Winter", cor_Year = 2019)
+spring19 <- data.frame(Date = seq(ymd("2019-02-02"), ymd("2019-03-24"), by = "days"), 
+                       Season = "Spring", cor_Year = 2019)
+summer19 <- data.frame(Date = seq(ymd("2019-03-25"), ymd("2019-11-01"), by = "days"), 
+                       Season = "Summer", cor_Year = 2019)
+phys2019 <- rbind(fall19, winter19, spring19, summer19)
+
+#2020
+# fall20
+# winter20 
+# spring20 <- data.frame(Date = seq(ymd("2020-02-23"), ymd("2020-03-10"), by = "days"))
+# summer20 <- data.frame(Date = seq(ymd("2020-03-11"), ymd("2020-11-01"), by = "days"))
+
+#2021
+fall21 <- data.frame(Date = seq(ymd("2020-11-03"), ymd("2020-12-26"), by = "days"), 
+                     Season = "Fall", cor_Year = 2021)
+winter21 <- data.frame(Date = seq(ymd("2020-12-27"), ymd("2021-02-22"), by = "days"), 
+                       Season = "Winter", cor_Year = 2021)
+spring21 <- data.frame(Date = seq(ymd("2021-02-23"), ymd("2021-03-16"), by = "days"), 
+                       Season = "Spring", cor_Year = 2021)
+summer21 <- data.frame(Date = seq(ymd("2021-03-17"), ymd("2021-11-02"), by = "days"), 
+                       Season = "Summer", cor_Year = 2021)
+phys2021 <- rbind(fall21, winter21, spring21, summer21)
+
+phys_seasons_ts <- rbind(phys2016, phys2017, phys2018, phys2019, phys2021)
+
+phys_seasons_ts_ice <- left_join(phys_seasons_ts, binded_icedata, by = "Date") %>% 
+  select(-julianDOY, -Days_since_1Dec) %>% 
+  mutate(icevector = ifelse(is.na(icevector), 0, icevector))
+
+write.csv(phys_seasons_ts_ice, "../../Data/Seasons_Ice_physical_9nov23.csv", row.names = F)
+
+
+```
+
+
+
+
+
+
+
+
+
