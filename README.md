@@ -2,7 +2,7 @@
 ## Summary
 Analysis of lake metabolism rates in Falling Creek Reservoir over multiple years 
 
-##Recreating all analysis steps 
+## Recreating all analysis steps 
 
 Run Install_packages.R and Download_data.R located in './Scripts/'. These scripts will download all need packages and data to rerun the entire analysis. 
 
@@ -29,7 +29,7 @@ Next run the following scripts located in './Scripts/03_Data_Analysis/' in order
 - 1_Metab_Figures.Rmd is primary data analysis and visualization script 
 - 2_Metab_Envi_Drivers.Rmd conducts environmental driver analysis
 
-##Recreating figures or reruning metabolism models 
+## Recreating figures or reruning metabolism models 
 
 The workflow above is designed to be able to recreate the analysis at multiple entry points. All data products needed to run the metabolism model are created in './Scripts/01_Data_Comp/' and are stored in './Data/Model_Input/'. 
 
