@@ -20,3 +20,4 @@ install.packages('Hmisc')  #rcorr
 install.packages('corrplot') #corrplot
 install.packages('MuMIn') #for dredge
 install.packages('here')
+install.packages('rsq')
