@@ -26,18 +26,17 @@ ysi_fcrmetab <- ysi_edi %>%
   filter(Reservoir == "FCR",
          Site == 50,
          Depth_m > 0,
-         DateTime >= as.POSIXct("2015-11-01 00:00:00", tz = "UTC")) %>% 
+         DateTime >= ymd_hms("2015-11-01 00:00:00")) %>% 
   select(Reservoir, Site, DateTime, Depth_m, Temp_C, DO_mgL, DOsat_percent, Flag_Temp_C, Flag_DO_mgL, Flag_DOsat_percent)
 
-#check on data flags: can change Flag DO to Flag temp or DOsat, only flags were 1 (sample not taken)
-ysi_flagcheck <- ysi_fcrmetab %>% 
-  filter(Flag_DO_mgL > 0)
 
 #filter desired data and write csv. this csv will be used in data comp script to get by year data
 ysi_fcrmetab_write <- ysi_fcrmetab %>% 
   select(DateTime, Depth_m, Temp_C, DO_mgL, DOsat_percent)
 
-write.csv(ysi_fcrmetab_write, "./Data/FCR_YSI_DO_temp_for_metabolism.csv", row.names = FALSE)
+#create directory to write data and make csv
+dir.create("./Data/Generated_Data")
+write.csv(ysi_fcrmetab_write, "./Data/Generated_Data/FCR_YSI_DO_temp.csv", row.names = FALSE)
 
 
 
@@ -48,15 +47,15 @@ ctd_edi <- read.csv("./Data/EDI2023/CTD_final_2013_2022.csv")
 #change Date from character to datetime
 ctd_edi$Date <- ymd_hms(ctd_edi$Date)
 
+#check for casts on dates we're missing thermistors in 2018
 ctd_2018 <- ctd_edi %>% 
   filter(Reservoir == "FCR",
          Site == 50,
          Depth_m > 0,
-         Date >= ymd("2018-01-10"),
+         Date >= ymd("2018-01-10"), 
          Date <= ymd("2018-07-10")) 
 
 ctd_2018dates <- unique(ctd_2018$Date)
-
 
 
 #filter to desired data 
@@ -67,9 +66,6 @@ ctd_fcrmetab <- ctd_edi %>%
          Date >= ymd_hms("2015-10-22 00:00:00")) %>%
   select(Reservoir, Site, Date, Depth_m, Temp_C, DO_mgL, DOsat_percent, Flag_Temp_C, Flag_DO_mgL, Flag_DOsat_percent)
 
-#check on data flags: can change Flag DO to Flag temp, only flags were 1 (sample not taken)
-ctd_flagcheck <- ctd_fcrmetab %>% 
-  filter(Flag_DO_mgL > 0) #can change to > 1 to check if flags besides samples not taken
 
 #Process CTD to make it easier to work with depths
 
@@ -130,16 +126,7 @@ ctd <- ctd %>%
 
 #write filtered ctd csv
 
-write.csv(ctd, "./Data/FCR_CTD_for_metabolism.csv", row.names = FALSE)
-
-
-
-
-
-
-
-
-
+write.csv(ctd, "./Data/Generated_Data/FCR_CTD_temp_DO.csv", row.names = FALSE)
 
   
 

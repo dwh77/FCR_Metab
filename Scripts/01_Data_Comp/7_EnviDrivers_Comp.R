@@ -8,7 +8,6 @@ library(ggpmisc)
 library(Metrics)
 
 
-
 ### Compile EXO and thermistor data ####
 
 #read in data from EDI
@@ -108,15 +107,11 @@ MET_FIN <- rbind(nldasmet_regress, met_2020_2022)
 #### Hydrology ####
 inflow <- read_csv("./Data/EDI2023/FCR_weir_2022.csv")
 
-
-inf_filt <- inflow %>% 
+inf_daily <- inflow %>% 
   select(DateTime, WVWA_Flow_cms, VT_Flow_cms) %>% 
   filter(DateTime > ymd_hms("2015-11-10 00:00:00"),
          DateTime < ymd("2022-03-02")) %>%         
-  mutate(Date = as.Date(DateTime)) #creates date column for averaging by day later 
-head(inf_filt)
-
-inf_daily <- inf_filt %>% 
+  mutate(Date = as.Date(DateTime)) %>% 
   group_by(Date) %>% 
   dplyr::summarise(WVWA_Flow_cms_daily_mean = mean(WVWA_Flow_cms, na.rm = TRUE),
             VT_Flow_cms_daily_mean = mean(VT_Flow_cms, na.rm = TRUE)) %>% 
@@ -137,7 +132,7 @@ inf_wrt <- inf_daily %>%
   mutate(Fin_WRT_days = ifelse(is.na(WRT_days_daily_wvwa), WRT_days_daily_vt, WRT_days_daily_wvwa),
          Fin_flow_cms = ifelse(is.na(WVWA_Flow_cms_daily_mean), VT_Flow_cms_daily_mean , WVWA_Flow_cms_daily_mean)
   )%>% 
-  filter(Date > ymd("2019-01-01")) %>% 
+  #filter(Date > ymd("2019-01-01")) %>% 
   select(Date, Fin_flow_cms, Fin_WRT_days) 
 
 plot(inf_wrt$Date, inf_wrt$Fin_WRT_days)
@@ -267,7 +262,7 @@ cor(kd_rmse$Kd_PARorCTD, kd_rmse$Kd_secchi, method = "pearson")
 
 
 #### E24 #### 
-source('./Scripts/Data_Compilation/E24_functions.R')
+source('./Scripts/01_Data_Comp/E24_functions.R')
 
 E24 <- kd_FIN
 
@@ -286,7 +281,6 @@ E0_df_daily <- E0_df %>%
 
 # get top of metalim 
 temp_prof_15_18 <- read_csv("./Data/Model_Input/2015_18/FCR_2015_18_TempProfiles_hobos_and_interped2018.csv")
-
 
 temp_prof_18_22 <- read_csv("./Data/Model_Input/2018_22/FCR_2018_22_TempProfiles.csv") %>% 
   dplyr::filter(dateTime > ymd_hms("2019-01-02 00:00:00"))
@@ -332,8 +326,7 @@ E24_tojoin <- E24_fin %>%
 
 
 #### schmidt ####
-schmidt <- read_csv("./Data/schmidt_timeseries_9nov23.csv")
-head(schmidt)
+schmidt <- read_csv("./Data/Generated_Data/schmidt_timeseries.csv")
 
 #### filtered chla ####
 # filtchla <- read_csv("./Data/EDI2023/manual_chlorophyll_2014_2022.csv")
@@ -391,11 +384,8 @@ drivers_ZT <- join_fin %>%
          E24_ZT = scale(E24_umolpm2s, center = TRUE, scale = TRUE),
          schmidt_ZT = scale(schmidt_daily, center = TRUE, scale = TRUE)
          #filt_chla_ZT = scale(Chla_ugL, center = TRUE, scale = TRUE)
-         ) %>% 
-  ######################## fix this select
-  select(1,19:35) %>% 
-  filter(Date >= ymd("2015-11-08"))
+         ) 
 
-#write.csv(drivers_ZT, "./Data/EnviDrivers_ZT_daily_compiled_15_22_22nov23.csv", row.names = F)
+write.csv(drivers_ZT, "./Data/Generated_Data/EnviDrivers_daily_ZT.csv", row.names = F)
 
 

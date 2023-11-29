@@ -7,7 +7,7 @@
 library(tidyverse)
 library(patchwork)
 
-#### DEVELOPING OFFSET FOR WVWA DATA FROM EXO #### 
+#### DEVELOPING OFFSET FOR InsiteIG (WVWA) DATA FROM EXO #### 
 
 #### read in wvwa DO sonde data from edi
 dosonde_edi <- read_csv("./Data/EDI2023/FCR_DOsondes_2012_2018.csv")
@@ -28,7 +28,7 @@ exo <- catwalk_EDI %>%
 
 
 #### pulling in YSI data 
-ysi <- read_csv("./Data/FCR_YSI_do_temp_for_metabolism.csv")
+ysi <- read_csv("./Data/Generated_Data/FCR_YSI_do_temp.csv")
 
 ysi_1_16 <- ysi %>% 
   dplyr::filter(Depth_m %in% c(1.0, 1.6)) %>% 

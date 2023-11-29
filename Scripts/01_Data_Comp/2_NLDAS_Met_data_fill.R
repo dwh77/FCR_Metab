@@ -45,19 +45,18 @@ SW_nldas_fcrmet<- joinedSW %>%
   ggplot(aes(x = NLDAS , y = FCRmet))+
   geom_point()+
   ggtitle("Shortwave FCR met ~ NLDAS")+
-  ylim(0,1000)+
-  xlim(0,1000)+
   labs(x = "NLDAS Shortwave", y = "FCR met station Shortwave")+
   stat_poly_line(method = "lm", linewidth = 2)+
-  # geom_smooth(aes(x = NLDAS, y = FCRmet), method = "lm", inherit.aes = F)+
   stat_poly_eq(formula=y~x, label.x = "left", label.y="top", parse=TRUE, inherit.aes = F,
                aes(x = NLDAS, y = FCRmet, label=paste(..adj.rr.label..,..p.value.label..,sep="~~~"),size=3))+
   stat_poly_eq(label.y = 0.85,
                aes(label = after_stat(eq.label))) +
-  geom_abline(slope = 1, intercept = 0, size=2, linetype =2, col = "red")+ #1:1 line
+  geom_abline(slope = 1, intercept = 0, linewidth=2, linetype =2, col = "red")+ #1:1 line
   theme_classic()
 
 SW_nldas_fcrmet
+
+dir.create("./Figures/")
 
 ggsave(filename = "./Figures/Fig_S2_Shortwave_NLDAS_FCRmet.png",
        SW_nldas_fcrmet, device = "png", width = 180, height = 150, units = "mm")
@@ -71,11 +70,8 @@ Wind_nldas_fcrmet<- joinedSW %>%
   ggplot(aes(x = NLDAS , y = FCRmet))+
   geom_point()+
   ggtitle("WindSpeed FCR met ~ NLDAS")+
-  # ylim(0,1000)+
-  # xlim(0,1000)+
   labs(x = "NLDAS WindSpeed", y = "FCR met station WindSpeed")+
   stat_poly_line(method = "lm", linewidth = 2)+
-  # geom_smooth(aes(x = NLDAS, y = FCRmet), method = "lm", inherit.aes = F)+
   stat_poly_eq(formula=y~x, label.x = "left", label.y="top", parse=TRUE, inherit.aes = F,
                aes(x = NLDAS, y = FCRmet, label=paste(..adj.rr.label..,..p.value.label..,sep="~~~"),size=3))+
   stat_poly_eq(label.y = 0.8,
@@ -98,8 +94,6 @@ wind_lm <- summary(lm(joinedSW$Wind_hourly~joinedSW$WindSpeed))
 
 model_input <- joinedSW %>% 
   select(time, SW_hourly, Wind_hourly, ShortWave, WindSpeed) %>% 
-  # mutate(SW_regress = ( -13.4 + (0.917 * ShortWave) ) ,
-  #        WindSpeed_regress = ( 1.1 + (0.238 * WindSpeed) )       ) %>% 
   mutate(SW_regress = ( coefficients(sw_lm)[1] + (coefficients(sw_lm)[2]* ShortWave) ) ,
          WindSpeed_regress = ( coefficients(wind_lm)[1] + (coefficients(wind_lm)[2] * WindSpeed) )) %>% 
   mutate(PAR_from_SWregress = sw.to.par.base(SW_regress, coeff = 2.114)) %>% 
@@ -109,7 +103,7 @@ model_input <- joinedSW %>%
          WindSpeed_nldas = WindSpeed)
 
 #write csv
-write.csv(model_input, "./Data/Met_input_from_NLDAS.csv", row.names = F)
+write.csv(model_input, "./Data/Generated_Data/Met_input_from_NLDAS.csv", row.names = F)
 
 
 #check rmse and model fit for SW and Wind

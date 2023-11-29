@@ -17,15 +17,12 @@ bathy_schmidt <- edi_bathy %>%
 
 
 ### read in Catwalk and hobo thermistors, and interpolated temp profiles for early 2018
-hobo_tempprofs <- read_csv("./Data/Model_Input/2015_18/FCR_2015_18_TempProfiles_hobos.csv") 
-
-interp2018_profiles <- read_csv("./Data/Model_Input/2015_18/FCR_2018_TempProfiles_hobo_glm_ctdysi_scc.csv") %>% 
-  filter(dateTime > ymd_hms("2018-01-15 00:00:00"),
-         dateTime < ymd_hms("2018-08-29 00:00:00"))
+temp_profs_15_18interp <- read_csv("./Data/Model_Input/2015_18/FCR_2015_18_TempProfiles_hobos_and_interped2018.csv") %>%
+  filter(dateTime < ymd_hms("2018-07-05 13:50:00")) #filter data that would overlap with catwalk profiles
 
 catwalk_tempprofs <- read_csv("./Data/Model_Input/2018_22/FCR_2018_22_TempProfiles.csv") 
 
-tempprofs <- bind_rows(hobo_tempprofs, interp2018_profiles, catwalk_tempprofs) 
+tempprofs <- bind_rows(temp_profs_15_18interp, catwalk_tempprofs) 
 
 
 ### Calculate density and temperature differences for profiles and assign startifciation definitions
@@ -143,7 +140,7 @@ schmidt_per_plot <- daily_ROC_long %>%
   geom_hline(yintercept = 0.1)+
   theme_classic()
 
-schmidt_per_plot
+#schmidt_per_plot
 # ggplotly(schmidt_per_plot)
 
 
@@ -162,26 +159,35 @@ strat_metrics <- daily_ROC %>%
     Strat_schmidtmax_5 = ifelse(Schmidt_percent_max > 5, "Strat", "Not_Strat")
     )
 
-write.csv(strat_metrics, "./Data/strat_metrics_9nov23.csv", row.names = F)
+write.csv(strat_metrics, "./Data/Generated_Data/strat_metrics.csv", row.names = F)
 
 
 ### Plot different strat metrics 
-strat_metrics %>% 
-  pivot_longer(-c(1:4)) %>% 
-  dplyr::mutate(value_numeric = ifelse(value == "Strat", 1, 0)) %>% 
-  filter(name %in% c("Strat_C_1", "Strat_Dens_0.1", "Strat_schmidtmax_2")) %>% 
+strat_metrics %>%
+  select(1:4) %>% 
+  pivot_longer(-1) %>%
+  # dplyr::mutate(value_numeric = ifelse(value == "Strat", 1, 0)) %>%
+  # filter(name %in% c("Strat_C_1", "Strat_Dens_0.1", "Strat_schmidtmax_2")) %>%
   ggplot()+
-  geom_point(aes(x = Date, y = value_numeric, color = name))
+  geom_point(aes(x = Date, y = value))+
+  facet_wrap(~name, ncol = 1, scales = "free_y")
+
+# strat_metrics %>%
+#   pivot_longer(-c(1:4)) %>%
+#   dplyr::mutate(value_numeric = ifelse(value == "Strat", 1, 0)) %>%
+#   filter(name %in% c("Strat_C_1", "Strat_Dens_0.1", "Strat_schmidtmax_2")) %>%
+#   ggplot()+
+#   geom_point(aes(x = Date, y = value_numeric, color = name))
 
 
 
-### Put schmidt stability toghether for envi drivers 
+### Put schmidt stability together for envi drivers 
 head(daily_ROC)
 
 schmidt_ts <- daily_ROC %>% 
   select(Date, schmidt_daily)
 
-write.csv(schmidt_ts, "./Data/schmidt_timeseries_9nov23.csv", row.names = F)
+write.csv(schmidt_ts, "./Data/Generated_Data/schmidt_timeseries.csv", row.names = F)
 
 
 

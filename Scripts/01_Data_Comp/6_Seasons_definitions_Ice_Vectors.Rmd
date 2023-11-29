@@ -9,13 +9,14 @@ output: html_document
 ```{r}
 library(tidyverse)
 
-thermal_metrics <- read.csv("../../Data/thermalmetric_calcs.csv")
+thermal_metrics <- read.csv("../../Data/Generated_Data/strat_metrics.csv") %>% 
+  select(Date, Diff_Dens_1to8, Schmidt_percent_max, Strat_Dens_0.1, Strat_schmidtmax_2)
 
 ice <- read_csv("../../Data/EDI2023/Ice_Data_2013_2022.csv")
 ice <- ice %>% 
   filter(Reservoir == "FCR")
 
-#I then manually looked through the ice and thermal metrics data frames to determine days that had ice cover (those time periods are defined in the chunk starting on line 23) and periods of thermal stratification using at 0.1 kg m^-3 thershold of difference from 1m to 8m depth (column Strat_Dens_0.1), where the start of stratification in a year was defined as the first day that the threshold was greater than 0.1 ("Strat") and remained that for at least 14 days, and stratificiation ended the first day that the threshold was less than 0.1 ("Not_Strat")
+#I then manually looked through the ice and thermal metrics data frames to determine days that had ice cover (those time periods are defined in the chunk starting on line 23) and periods of thermal stratification using at 0.1 kg m^-3 thershold of difference from 1m to 8m depth (column Strat_Dens_0.1) and 2% of max Schmidt Stability (Strat_schmidtmax_2), where the start of stratification in a year was defined as the first day that the threshold was greater than 0.1 ("Strat") and greater than 2% ("Strat") and remained that for at least 14 days, and stratificiation ended the first day that the threshold was less than 0.1 ("Not_Strat") and less than 2% ("Not_Strat")
 
 ```
 
@@ -105,8 +106,8 @@ fall$Season <- "Fall"
 fall$corrected_Year <- year(fall$Date)
 
 #Put all seasons together 
-seasons_ts <- rbind(fall, spring, summer, winter)
-seasons_ts <- dplyr::arrange(seasons_ts, Date)
+seasons_ts_opWinter_physSummer <- rbind(fall, spring, summer, winter)
+seasons_ts_opWinter_physSummer <- dplyr::arrange(seasons_ts, Date)
 ```
 
 
@@ -188,15 +189,13 @@ binded_icedata <- rbind(ice2014, ice2015, ice2016, ice2017, ice2018, ice2019, ic
 
 ```
 
-##bind seasons to ice dates 
+##bind operation winter/thermal summer seasons to ice dates 
 
 ```{r}
-head(binded_icedata)
-head(seasons_ts)
 
-joined_seasons_ice <- left_join(seasons_ts, binded_icedata, by = "Date")
+joined_opWinter_physSummer_seasons_ice <- left_join(seasons_ts_opWinter_physSummer, binded_icedata, by = "Date")
 
-write.csv(joined_seasons_ice, "../../Data/Seasons_Ice_corrected_groupings.csv", row.names = F)
+write.csv(joined_opWinter_physSummer_seasons_ice, "../../Data/Generated_Data/Seasons_Ice_operWinter_physSummer.csv", row.names = F)
 ```
 
 ## Make equinox classifications 
@@ -219,7 +218,7 @@ solar_seasonsA <- left_join(solar_seasons, binded_icedata, by = "Date") %>%
   mutate(icevector = ifelse(is.na(icevector), 0, icevector))
 
 
-write.csv(solar_seasonsA, "../../Data/Seasons_solar_Ice.csv", row.names = F)
+write.csv(solar_seasonsA, "../../Data/Generated_Data/Seasons_solar_Ice.csv", row.names = F)
 
 
 ```
@@ -247,14 +246,14 @@ operational_seasonsA <- left_join(operational_seasons, binded_icedata, by = "Dat
   select(1:5) %>% 
   mutate(icevector = ifelse(is.na(icevector), 0, icevector))
 
-write.csv(operational_seasonsA, "../../Data/Seasons_operational_Ice.csv", row.names = F)
+write.csv(operational_seasonsA, "../../Data/Generated_Data/Seasons_operational_Ice.csv", row.names = F)
 
 
 
 
 ```
 
-##Make data frames to define seasons - winter based on ice not operational above 
+##Make data frames to define seasons - winter based on ice not operational above and summer based on year to year strat
 
 ```{r}
 ## 2016
@@ -324,7 +323,7 @@ phys_seasons_ts_ice <- left_join(phys_seasons_ts, binded_icedata, by = "Date") %
   select(-julianDOY, -Days_since_1Dec) %>% 
   mutate(icevector = ifelse(is.na(icevector), 0, icevector))
 
-write.csv(phys_seasons_ts_ice, "../../Data/Seasons_Ice_physical_9nov23.csv", row.names = F)
+write.csv(phys_seasons_ts_ice, "../../Data/Generated_Data/Seasons_Ice_physical.csv", row.names = F)
 
 
 ```

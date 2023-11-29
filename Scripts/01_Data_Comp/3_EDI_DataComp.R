@@ -7,16 +7,15 @@ library(LakeMetabolizer) #using to convert Shortwave to PAR for metabolism model
 library(ggpmisc) # for lm for par comparison
 library(Metrics) #for rmse
 library(zoo) #for na.approx 
-#library(plyr) # for rbind.fill
 
-
+dir.create('Data/Model_Input/')
 dir.create('Data/Model_Input/2018_22')
 dir.create('Data/Model_Input/2015_18')
 
 ### Compile EXO and thermistor data ####
 
 #read in data from EDI
-catwalk_EDI <- read_csv("./Data/EDI2023/FCR_Catwalk_2018_2022.csv", col_types = cols(.default = "d", Reservoir = "c", DateTime = "T"))
+catwalk_EDI <- read_csv("./Data/EDI2023/FCR_Catwalk_2018_2022.csv")
 
 
 ##Geting EXO DO and Sensor temp for each year and writing csvs to use in metab model
@@ -77,7 +76,6 @@ write.csv(temp_18_22, file = "./Data/Model_Input/2018_22/FCR_2018_22_sensorTemp.
 
 
 #Temp profiles 2018 to 2022
-
 temp_profiles_2018_22 <- catwalk %>%
   dplyr::select(-DO, -sensorTemp) %>% 
   dplyr::filter(dateTime >= ymd_hms("2018-01-01 00:00:00"),
@@ -96,7 +94,7 @@ met_EDI <- read_csv("./Data/EDI2023/FCR_Met_final_2015_2022.csv")
 ##first get 10 min par and windspeed for EXO data 
 
 #filter to desired variables and summarize data to 10 min from 1 minute
-met_filt_tenmin <- met_EDI %>% 
+met_tenmin <- met_EDI %>% 
   dplyr::filter(DateTime >= ymd_hms("2018-08-29 00:00:00"),
          DateTime <= ymd_hms("2022-03-01 23:50:00")) %>% 
   dplyr::select(DateTime, ShortwaveRadiationUp_Average_W_m2, WindSpeed_Average_m_s, PAR_umolm2s_Average) %>% 
@@ -110,30 +108,29 @@ met_filt_tenmin <- met_EDI %>%
          Minute_tenminutebreaks = ifelse(minutes >= 36 & minutes <= 45,  40, Minute_tenminutebreaks),
          Minute_tenminutebreaks = ifelse(minutes >= 46 & minutes <= 55,  50, Minute_tenminutebreaks),
          Hour = ifelse(minutes >= 56, Hour+1, Hour)) %>% 
-  dplyr::rename(Minute = Minute_tenminutebreaks)
-
-
-met_tenmin <- met_filt_tenmin %>% 
-  dplyr::group_by(Date, Hour, Minute) %>% 
+  dplyr::rename(Minute = Minute_tenminutebreaks) %>% 
+  dplyr::mutate(DateTimeA = make_datetime(year = year(Date), month = month(Date), day = day(Date), hour = Hour, min = Minute, tz ="UTC")) %>% 
+  dplyr::group_by(DateTimeA) %>% 
   dplyr::summarize(ShortwaveRadiationUp_Average_W_m2_tenminmean = mean(ShortwaveRadiationUp_Average_W_m2, na.rm = TRUE),
-            WindSpeed_Average_m_s_tenminmean = mean(WindSpeed_Average_m_s, na.rm = TRUE),
-            PAR_Average_umol_s_m2_tenminmean = mean(PAR_umolm2s_Average, na.rm  = T),
-            .groups = "drop") %>% 
-  dplyr::mutate(DateTime = make_datetime(year = year(Date), month = month(Date), day = day(Date), hour = Hour, min = Minute, tz ="UTC")) %>% 
-  dplyr::select(DateTime, ShortwaveRadiationUp_Average_W_m2_tenminmean, WindSpeed_Average_m_s_tenminmean, PAR_Average_umol_s_m2_tenminmean)
+                   WindSpeed_Average_m_s_tenminmean = mean(WindSpeed_Average_m_s, na.rm = TRUE),
+                   PAR_Average_umol_s_m2_tenminmean = mean(PAR_umolm2s_Average, na.rm  = T),
+                   .groups = "drop") %>% 
+  dplyr::rename(DateTime = DateTimeA)
+
+met_tenmin$DateTime[duplicated(met_tenmin$DateTime)]
 
 
 #converting our SW data to PAR for use in the metabfunction 
 met_tenmin_PAR <- sw.to.par(met_tenmin, sw.col = "ShortwaveRadiationUp_Average_W_m2_tenminmean", coeff = 2.114)
 
 #compare converted PAR to actual PAR 
-met_tenmin_PAR %>% 
-  ggplot(aes(x = PAR_Average_umol_s_m2_tenminmean, y = par ))+
-  geom_point()+
-  geom_abline(slope = 1, intercept = 0, size=2, linetype =2, col = "red")+ #1:1 line
-  geom_smooth(method = "lm", inherit.aes = T)+ 
-  stat_poly_eq(formula=y~x,label.x = "left",label.y="top",parse=TRUE,inherit.aes = T,
-               aes(x = PAR_Average_umol_s_m2_tenminmean, y = par, label=paste(..adj.rr.label..,..p.value.label..,sep="~~~"),size=3))
+# met_tenmin_PAR %>% 
+#   ggplot(aes(x = PAR_Average_umol_s_m2_tenminmean, y = par ))+
+#   geom_point()+
+#   geom_abline(slope = 1, intercept = 0, size=2, linetype =2, col = "red")+ #1:1 line
+#   geom_smooth(method = "lm", inherit.aes = T)+ 
+#   stat_poly_eq(formula=y~x,label.x = "left",label.y="top",parse=TRUE,inherit.aes = T,
+#                aes(x = PAR_Average_umol_s_m2_tenminmean, y = par, label=paste(..adj.rr.label..,..p.value.label..,sep="~~~"),size=3))
 
 
 #2018 to 2022
@@ -158,7 +155,7 @@ write.csv(windspeed_2018_22, file = "./Data/Model_Input/2018_22/FCR_2018_22_Wind
 ##### Next get 15 min par and windspeed for WVWA data 
 
 #filter to desired variables and summarize data to 10 min from 1 minute
-met_filt_15min <- met_EDI %>% 
+met_15min <- met_EDI %>% 
   dplyr::filter(DateTime >= ymd_hms("2015-11-08 00:00:00"),
          DateTime <= ymd_hms("2019-01-02 00:00:00")) %>% 
   dplyr::select(DateTime, ShortwaveRadiationUp_Average_W_m2, WindSpeed_Average_m_s) %>% 
@@ -170,16 +167,15 @@ met_filt_15min <- met_EDI %>%
          Minute_15minutebreaks = ifelse(minutes >= 23 & minutes <= 37,  30, Minute_15minutebreaks),
          Minute_15minutebreaks = ifelse(minutes >= 38 & minutes <= 52,  45, Minute_15minutebreaks),
          Hour = ifelse(minutes >= 53, Hour+1, Hour)) %>%  
-  dplyr::rename(Minute = Minute_15minutebreaks)
-
-
-met_15min <- met_filt_15min %>% 
-  dplyr::group_by(Date, Hour, Minute) %>% 
+  dplyr::rename(Minute = Minute_15minutebreaks) %>% 
+  dplyr::mutate(DateTimeA = make_datetime(year = year(Date), month = month(Date), day = day(Date), hour = Hour, min = Minute, tz ="UTC")) %>% 
+  dplyr::group_by(DateTimeA) %>% 
   dplyr::summarize(ShortwaveRadiationUp_Average_W_m2_15minmean = mean(ShortwaveRadiationUp_Average_W_m2, na.rm = TRUE),
-            WindSpeed_Average_m_s_15minmean = mean(WindSpeed_Average_m_s, na.rm = TRUE),
-            .groups = "drop") %>% 
-  dplyr::mutate(DateTime = make_datetime(year = year(Date), month = month(Date), day = day(Date), hour = Hour, min = Minute, tz ="UTC")) %>% 
-  dplyr::select(DateTime, ShortwaveRadiationUp_Average_W_m2_15minmean, WindSpeed_Average_m_s_15minmean)
+                   WindSpeed_Average_m_s_15minmean = mean(WindSpeed_Average_m_s, na.rm = TRUE),
+                   .groups = "drop")  %>% 
+  dplyr::rename(DateTime = DateTimeA)
+
+met_15min$DateTime[duplicated(met_15min$DateTime)]
 
 
 
@@ -192,7 +188,7 @@ met_15min_PAR <- met_15min_PAR %>%
 
 
 #bring in NLDAS regression data to gap fill missing time periods (gaps; 140ct2016 - 19dec2016, 6feb - 24apr2017, 19mar - 5apr2018)
-nldas <- read.csv("./Data/Met_input_from_NDLAS.csv")
+nldas <- read.csv("./Data/Generated_Data/Met_input_from_NLDAS.csv")
 
 
 missing_met_dates <- c(seq(ymd_hms("2016-10-14 16:00:00"), ymd_hms("2016-12-19 14:00:00"), by = "1 hour"),
@@ -208,6 +204,8 @@ nldas_gapfill <- nldas %>%
 
 met_15min_PAR_nldasfilled <- dplyr::full_join(met_15min_PAR, nldas_gapfill, by = c("DateTime", "PAR", "windSpeed")) %>% 
   dplyr::arrange(DateTime)
+
+met_15min_PAR_nldasfilled$DateTime[duplicated(met_15min_PAR_nldasfilled$DateTime)]
 
 #PAR and WindSpeed 2015 to 2018
 PAR_from_SW_2015_18 <- met_15min_PAR_nldasfilled %>%
@@ -265,13 +263,11 @@ profiles2015_18 <- profiles2015_18 %>%
   dplyr::summarise(across(.cols = where(is.numeric), .fns = ~mean(.x, na.rm = TRUE)), .groups = "drop")
 
 #write csv
-write.csv(profiles2015_18, file = "./Data/Model_Input/2015_18/FCR_2015_18_TempProfiles_hobos.csv", row.names = FALSE)
+#write.csv(profiles2015_18, file = "./Data/Model_Input/2015_18/FCR_2015_18_TempProfiles_hobos.csv", row.names = FALSE)
 
 
 
-#### Making input files w/ GLM hourly data #####
-
-#### making input files for 2018 and 19 using GLM temp 
+#### Making input files w/ GLM and interpolated 2018 #####
 
 ##read in data 
 glmtemp_hourly <- read_csv("./Data/Carey2022_glm/ModeledWaterTempFCRForDexter_22Aug2022.csv")
@@ -298,9 +294,6 @@ temp_profiles_2018_19_glm_hourly <- temp_profiles_glm_hourly %>%
 
 
 ### Compare glm hourly to catwalk thermistors to get RMSE 
-head(temp_profiles_2018_22)
-
-head(temp_profiles_glm_hourly)
 
 #use 2019-2020 for comp
 temp_prof_18_22_long <- temp_profiles_2018_22 %>% 
@@ -332,7 +325,7 @@ scc_thermistors <- temp_profiles_2018_22 %>%
 ### Find data for in between these two 
 
 ## YSI 
-ysi <- read_csv("./Data/FCR_YSI_do_temp_for_metabolism.csv")
+ysi <- read_csv("./Data/Generated_Data/FCR_YSI_do_temp.csv")
 
 ysi18_temp_profiles_cleaned <- ysi %>% 
   dplyr::filter(DateTime > ymd("2017-12-31"),
@@ -353,7 +346,7 @@ ysi18_temp_profiles_cleaned <- ysi %>%
          temp9.0 = "9")
 
 ## CTD 
-ctd <- read_csv("./Data/FCR_CTD_for_metabolism.csv")
+ctd <- read_csv("./Data/Generated_Data/FCR_CTD_temp_do.csv")
 head(ctd)
 
 ctd18_temp_profiles_cleaned <- ctd %>% 
@@ -447,7 +440,7 @@ profiles2018_final <- joined %>%
 
 
 #write temp profile for 2018 for wvwa sondes 
-write.csv(profiles2018_final, file = "./Data/Model_Input/2015_18/FCR_2018_TempProfiles_hobo_glm_ctdysi_scc.csv", row.names = FALSE) 
+#write.csv(profiles2018_final, file = "./Data/Model_Input/2015_18/FCR_2018_TempProfiles_hobo_glm_ctdysi_scc.csv", row.names = FALSE) 
 
 #make a csv that has hobos 2015 - jan2018 the interpolated values from csv above 
 

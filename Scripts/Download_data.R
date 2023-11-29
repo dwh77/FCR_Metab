@@ -22,7 +22,7 @@ download.file(inUrl3,infile3, method = "curl")
 ### EXO data
 inUrl4 <- "https://pasta.lternet.edu/package/data/eml/edi/271/7/71e6b946b751aa1b966ab5653b01077f"
 infile4 <- paste0(getwd(),"/Data/EDI2023/FCR_Catwalk_2018_2022.csv")
-download.file(inUrl4,infile4)
+download.file(inUrl4,infile4, method = "curl")
 
 
 ### dowload WVWA DO sonde data from EDI
