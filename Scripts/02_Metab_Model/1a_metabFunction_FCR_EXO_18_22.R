@@ -50,16 +50,13 @@
 
 ### Modfied March 2021 by DWH for FCR ###
 
-## check working directory, if its not at base of project ./FCR_Metabolism, manually reset to this point
+## check working directory, if its not at base of project ./FCR_Metabolism, run line 56
 getwd()
 
-##FEO addition check if this works 
 setwd(here::here())
 
 #load packages
 #ad in if from line 88
-if(!require(tidyverse)){install.packages("tidyverse")}
-
 library(tidyverse)
 
 #Inputs are: #All of these should be loaded to the workspace before running this script
@@ -79,9 +76,10 @@ dataIn  <- c("FCR_2018_2022_DO.csv", "FCR_2018_2022_sensorTemp.csv", "FCR_2018_2
             #   'Acton_2008_sensorTemp.txt','Acton_2008_tempProfile.txt')
 dirFxns  <- "./Scripts/Metab_Model"    # Directory where functions are located, e.g. 'C:/GLEON/functions'
 dirDump  <- "./Data/Model_Output/FCR2018_22"   # Directory where outputs should be dumped, e.g. 'C:/GLEON/Acton/Results'
+dir.create('./Data/Model_Output/')
 dir.create(dirDump)
 
-ice <- read_csv("./Data/Seasons_Ice_corrected_groupings.csv")
+ice <- read_csv("./Data/Generated_Data/Seasons_Ice_operWinter_physSummer.csv")
 
   
 ##DCR: here we are expanding out the day to include points before and after sunrises
@@ -92,7 +90,6 @@ hours.BeforeAfter<-ModelVersion[3]
 DF.residuals.Analysis.Year<-as.data.frame(matrix(nrow=0,ncol=12))
 
 #Load in the suncalc package for sunrise and sunsets
-if(!require(suncalc)){install.packages("suncalc")}
 library(suncalc)
 
 ########################################
@@ -100,10 +97,10 @@ library(suncalc)
 
 #Load in required functions
 #setwd(dirFxns), not setting wd here so that script can be run on any computer
-source('./Scripts/Metab_Model/metabLoss_v8.R')
-source('./Scripts/Metab_Model/metabPredix_v8.R')
-source('./Scripts/Metab_Model/fillHoles.R')
-source('./Scripts/Metab_Model/calcZMixDens.R')
+source('./Scripts/02_Metab_Model/model_functions/metabLoss_v8.R')
+source('./Scripts/02_Metab_Model/model_functions/metabPredix_v8.R')
+source('./Scripts/02_Metab_Model/model_functions/fillHoles.R')
+source('./Scripts/02_Metab_Model/model_functions/calcZMixDens.R')
 
 #Set environment tz variable to GMT
 Sys.setenv(tz="EST")

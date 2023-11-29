@@ -4,6 +4,12 @@
 #load packages
 library(tidyverse)
 
+#check wd after running models
+getwd()
+setwd(here::here())
+getwd()
+
+
 #### read in data ####
 ## EXO data 
 metaboutput2018_22 <- read.table("./Data/Model_Output/FCR2018_22/FCR2018_22 outputDCR.txt",header=T,sep='\t')
@@ -12,7 +18,7 @@ metaboutput2018_22 <- metaboutput2018_22 %>%
   mutate(solarDay = as.Date(solarDay))
 
 ##InsiteIG (wvwa) data 
-metaboutput2015_18 <- read.table("./Data/Model_Output/FCR2015_18a/FCR2015_18 outputDCR.txt",header=T,sep='\t')
+metaboutput2015_18 <- read.table("./Data/Model_Output/FCR2015_18/FCR2015_18 outputDCR.txt",header=T,sep='\t')
 metaboutput2015_18 <- metaboutput2015_18 %>% 
   mutate(solarDay = as.Date(solarDay)) %>% 
   filter(solarDay < ymd("2018-08-29"))
@@ -76,7 +82,7 @@ metab_QAQCfin2 %>%
 
 
 #writing csv for export
-write.csv(metab_QAQCfin2, "./Data/Model_Output/MetabOutput_QAQC_15_22_22nov23.csv", row.names = FALSE)
+write.csv(metab_QAQCfin2, "./Data/Model_Output/MetabOutput_QAQC_15_22.csv", row.names = FALSE)
 
 
 

@@ -10,6 +10,7 @@ install.packages('zoo') #for na.approx
 install.packages('patchwork')
 install.packages('rLakeAnalyzer')
 install.packages('insol')
+install.packages('suncalc')
 install.packages('ggpubr') #for stat compare mean
 install.packages('gridExtra')
 install.packages('stringr') #wrap x axis label text
@@ -18,6 +19,4 @@ install.packages('FSA') #dunn test
 install.packages('Hmisc')  #rcorr
 install.packages('corrplot') #corrplot
 install.packages('MuMIn') #for dredge
-#from FEO
-install.packages('suncalc')
 install.packages('here')
