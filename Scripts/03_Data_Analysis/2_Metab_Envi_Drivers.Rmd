@@ -168,31 +168,47 @@ gppdf <- gppdf %>%
                     "+", round(SRP_ZT,2), "(SRP)", "-", round(NH4_ZT,2), "(NH4)", "-", round(rain_ZT,2), "(Precip)", "-",
                     round(NO3NO2_ZT,2), "(NO3)", "-",   round(TP_ZT,2), "(TP)" , sep = "" ))
 
-##find R2
+##find R2 and pvalues 
+null_gpp <- glm (GPP_QAQC ~ 1,    ### Create null model
+             data = daily_AR,            ###   with only a constant on the right side
+             family = gaussian)
+
+
+
 #mod 1
 gpp_mod1 <- glm(GPP_QAQC ~ GPPlag + TN_ZT + E24_ZT , data = daily_AR, family = gaussian, na.action = 'na.fail') 
 #pred_gpp1 <- predict(gpp_mod1, newdata = daily_AR)
 round((rsq::rsq(gpp_mod1, type = 'sse')), digits = 2)
+round(anova(gpp_mod1, null_gpp, test = 'Chisq'), digits = 2)
 
 #mod 2
 gpp_mod2 <- glm(GPP_QAQC ~ GPPlag + TN_ZT + E24_ZT + SRP_ZT, data = daily_AR, family = gaussian, na.action = 'na.fail')
 round((rsq::rsq(gpp_mod2, type = 'sse')), digits = 2)
+round(anova(gpp_mod2, null_gpp, test = 'Chisq'), digits = 2)
+
 
 #mod 3
 gpp_mod3 <- glm(GPP_QAQC ~ GPPlag + TN_ZT + E24_ZT + SRP_ZT + NH4_ZT, data = daily_AR, family = gaussian, na.action = 'na.fail') 
 round((rsq::rsq(gpp_mod3, type = 'sse')), digits = 2)
+round(anova(gpp_mod3, null_gpp, test = 'Chisq'), digits = 2)
+
 
 #mod 4
 gpp_mod4 <- glm(GPP_QAQC ~ GPPlag + TN_ZT + E24_ZT + NH4_ZT, data = daily_AR, family = gaussian, na.action = 'na.fail')
 round((rsq::rsq(gpp_mod4, type = 'sse')), digits = 2)
+round(anova(gpp_mod4, null_gpp, test = 'Chisq'), digits = 2)
+
 
 #mod 5
 gpp_mod5 <- glm(GPP_QAQC ~ GPPlag + TN_ZT + E24_ZT + SRP_ZT + rain_ZT, data = daily_AR, family = gaussian, na.action = 'na.fail')
 round((rsq::rsq(gpp_mod5, type = 'sse')), digits = 2)
+round(anova(gpp_mod5, null_gpp, test = 'Chisq'), digits = 2)
+
 
 #mod 6
 gpp_mod6 <- glm(GPP_QAQC ~ GPPlag + TN_ZT + E24_ZT  + rain_ZT, data = daily_AR, family = gaussian, na.action = 'na.fail')
 round((rsq::rsq(gpp_mod6, type = 'sse')), digits = 2)
+round(anova(gpp_mod6, null_gpp, test = 'Chisq'), digits = 2)
 
 
 
@@ -212,14 +228,21 @@ summary(model_dailyR_fin)
 
 glm_dailyR <- dredge(model_dailyR_fin, rank = "AICc", fixed = "Rlag") 
 
-## get R2
+## get R2 and pvalues
+null_r <- glm (R_QAQC ~ 1,    ### Create null model
+             data = daily_AR,            ###   with only a constant on the right side
+             family = gaussian)
+
 #mod1
 r_mod1 <- glm(R_QAQC ~ Rlag, data = daily_AR, family = gaussian, na.action = 'na.fail') 
 round((rsq::rsq(r_mod1, type = 'sse')), digits = 2)
+anova(r_mod1, null_r, test = "Chisq")
 
 #mod2
 r_mod2 <- glm(R_QAQC ~ Rlag + NO3NO2_ZT, data = daily_AR, family = gaussian, na.action = 'na.fail')
 round((rsq::rsq(r_mod2, type = 'sse')), digits = 2)
+anova(r_mod2, null_r, test = "Chisq")
+
 
 
 ```
@@ -237,22 +260,30 @@ summary(model_dailyNEP_fin)
 
 glm_dailyNEP <- dredge(model_dailyNEP_fin, rank = "AICc", fixed = "NEMlag") 
 
-## getting R2
+## getting R2 and pvalue 
+null_nep <- glm (NEM_QAQC ~ 1,    ### Create null model
+             data = daily_AR,            ###   with only a constant on the right side
+             family = gaussian)
+
 #mod1
 nep_mod1 <- glm(NEM_QAQC ~ NEMlag, data = daily_AR, family = gaussian, na.action = 'na.fail')
 round((rsq::rsq(nep_mod1, type = 'sse')), digits = 2)
+anova(nep_mod1, null_nep, test = "Chisq")
 
 #mod2
 nep_mod2 <- glm(NEM_QAQC ~ NEMlag + SRP_ZT, data = daily_AR, family = gaussian, na.action = 'na.fail')
 round((rsq::rsq(nep_mod2, type = 'sse')), digits = 2)
+anova(nep_mod2, null_nep, test = "Chisq")
 
 #mod3
 nep_mod3 <- glm(NEM_QAQC ~ NEMlag + NO3NO2_ZT, data = daily_AR, family = gaussian, na.action = 'na.fail')
 round((rsq::rsq(nep_mod3, type = 'sse')), digits = 2)
+anova(nep_mod3, null_nep, test = "Chisq")
 
 #mod4
 nep_mod4 <- glm(NEM_QAQC ~ NEMlag + DOC_ZT, data = daily_AR, family = gaussian, na.action = 'na.fail')
 round((rsq::rsq(nep_mod4, type = 'sse')), digits = 2)
+anova(nep_mod4, null_nep, test = "Chisq")
 
 
 
