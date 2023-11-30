@@ -14,16 +14,15 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 library(tidyverse)
 library(ggpubr)
-metaboutput <- read.csv("../../Data/Model_Output/MetabOutput_QAQC_15_22_09jun23.csv")
+metaboutput <- read.csv("../../Data/Model_Output/MetabOutput_QAQC_15_22.csv")
 head(metaboutput)
 
 metaboutput1 <- metaboutput %>% 
-  filter(R_QAQC < 18) %>% #remove three high R and NEP values that have poor model fits 
   select(solarDay, GPP_QAQC, R_QAQC, NEM_QAQC) %>% 
   mutate(solarDay = ymd(solarDay))
 
 #read in seasons data frame 
-seasons_ts_operational <- read.csv("../../Data/Seasons_operational_Ice.csv")
+seasons_ts_operational <- read.csv("../../Data/Generated_Data/Seasons_operational_Ice.csv")
 seasons_ts_operational$Date <- as.Date(seasons_ts_operational$Date)
 
 metab_seasons_operational <- left_join(seasons_ts_operational, metaboutput1, by = c("Date" = "solarDay")) %>% 
@@ -47,6 +46,8 @@ seasons_NEPs <- metab_seasons %>%
   group_by(Season, corrected_Year) %>% 
   summarise(NEP_mean = mean(NEM_QAQC, na.rm = T)) 
 
+seasons_NEPs
+
 #get ice covered vs ice free mean NEP for each winter 
 winterNEPs <- metab_seasons %>% 
   #filter(corrected_Year %in% c(2019,2021)) %>% 
@@ -55,6 +56,7 @@ winterNEPs <- metab_seasons %>%
   group_by(corrected_Year, Season, icevector) %>% 
   summarise(NEP_mean = mean(NEM_QAQC, na.rm = T))
 
+winterNEPs
 
 #make data frame that assigns the mean to each day of the year for 2019-2021 (the years where we have a mean for each time period)
 
@@ -78,7 +80,7 @@ Dates_FIN <- dates_df_B %>%
 ```
 
 
-## Try putting all mutates in one chunk
+## Run Simulations
 
 ```{r}
 
@@ -181,8 +183,9 @@ results2021_80 <- metab_simulations_TEST %>%
 results_80day <- rbind(results2019_80, results2021_80)
 
 results1 <- left_join(results0to20, results_40day, by = "corrected_Year")
-results2 <- left_join(results1, results_80day, by = "corrected_Year")
+results2 <- left_join(results1, results_80day, by = "corrected_Year") %>%  mutate_if(is.numeric, round, digits=2)
 
+results2
 
 
 #### stats
@@ -227,10 +230,11 @@ k201921 <- k201921 %>%
 k201921long <- k201921 %>%  pivot_longer(-8)
 
 kruskal <- kruskal.test(value ~ name, data = k201921long)
+kruskal
 dunn <- FSA::dunnTest(value ~ name, data = k201921long)
 dunn_letters <- dunn$res
 dunn_letters_list <- rcompanion::cldList(comparison = dunn_letters$Comparison, p.value = dunn_letters$P.adj, threshold = 0.05)
-
+dunn_letters_list
 
 
 
