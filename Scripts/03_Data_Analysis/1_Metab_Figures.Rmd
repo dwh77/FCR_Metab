@@ -1117,7 +1117,7 @@ icecover_dotplots_B <- binded_icedata_remove_zeros %>%
   geom_hline(yintercept=0.5, linewidth = 1)+
   #theme_bw()+  
   theme(legend.position="top",
-        legend.background =  element_rect(color = "black", linetype = "solid", fill = "lightgray"))+
+        legend.background =  element_rect(color = "black", linetype = "solid", fill = "gray83"))+
   theme(panel.border=element_blank(),
         axis.line = element_line(color="black"),
         # plot.background = element_blank(),
@@ -1129,14 +1129,13 @@ icecover_dotplots_B <- binded_icedata_remove_zeros %>%
         axis.text = element_text(size=32,color="black"),
         legend.text = element_text(size=32,color="black"))+ #these size were 18 before 
   #scale_fill_manual(values=c("#30D5C8", "#D3D3D3"))
-   scale_fill_manual(values=c("#FAF9F6", "lightblue"))
+   scale_fill_manual(values=c("#FAF9F6", "skyblue2"))
 
 
 icecover_dotplots_B
 
 ggsave(filename = "../../Figures/Fig1b_icecover.png",
        icecover_dotplots_B, device = "png", width = 10.6, height = 20, units = "in")
-
 
 ```
 
