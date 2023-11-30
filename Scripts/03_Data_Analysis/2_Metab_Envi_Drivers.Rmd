@@ -160,13 +160,13 @@ summary(model_dailyGPP)
 glm_dailyGPP <- dredge(model_dailyGPP, rank = "AICc", fixed = "GPPlag") 
 
 ## make equations to copy to table 
-# gppdf <- as.data.frame(glm_dailyGPP) %>%
-#   rename(Intercept = 1)
-# 
-# gppdf <- gppdf %>%
-#   mutate(eq = paste("GPP = ", round(Intercept,2), "+", round(GPPlag,2), "(GPPlag1)", "+", round(TN_ZT,2), "(TN)", "+", round(E24_ZT,2), "(E24)", 
-#                     "+", round(SRP_ZT,2), "(SRP)", "-", round(NH4_ZT,2), "(NH4)", "-", round(rain_ZT,2), "(Precip)", "-",
-#                     round(NO3NO2_ZT,2), "(NO3)", "-",   round(TP_ZT,2), "(TP)" , sep = "" ))
+gppdf <- as.data.frame(glm_dailyGPP) %>%
+  rename(Intercept = 1)
+
+gppdf <- gppdf %>%
+  mutate(eq = paste("GPP = ", round(Intercept,2), "+", round(GPPlag,2), "(GPPlag1)", "+", round(TN_ZT,2), "(TN)", "+", round(E24_ZT,2), "(E24)",
+                    "+", round(SRP_ZT,2), "(SRP)", "-", round(NH4_ZT,2), "(NH4)", "-", round(rain_ZT,2), "(Precip)", "-",
+                    round(NO3NO2_ZT,2), "(NO3)", "-",   round(TP_ZT,2), "(TP)" , sep = "" ))
 
 ##find R2
 #mod 1
@@ -187,11 +187,11 @@ gpp_mod4 <- glm(GPP_QAQC ~ GPPlag + TN_ZT + E24_ZT + NH4_ZT, data = daily_AR, fa
 round((rsq::rsq(gpp_mod4, type = 'sse')), digits = 2)
 
 #mod 5
-gpp_mod5 <- glm(GPP_QAQC ~ GPPlag + TN_ZT + E24_ZT + rain_ZT, data = daily_AR, family = gaussian, na.action = 'na.fail')
+gpp_mod5 <- glm(GPP_QAQC ~ GPPlag + TN_ZT + E24_ZT + SRP_ZT + rain_ZT, data = daily_AR, family = gaussian, na.action = 'na.fail')
 round((rsq::rsq(gpp_mod5, type = 'sse')), digits = 2)
 
 #mod 6
-gpp_mod6 <- glm(GPP_QAQC ~ GPPlag + TN_ZT + E24_ZT + SRP_ZT + rain_ZT, data = daily_AR, family = gaussian, na.action = 'na.fail')
+gpp_mod6 <- glm(GPP_QAQC ~ GPPlag + TN_ZT + E24_ZT  + rain_ZT, data = daily_AR, family = gaussian, na.action = 'na.fail')
 round((rsq::rsq(gpp_mod6, type = 'sse')), digits = 2)
 
 
