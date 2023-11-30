@@ -67,7 +67,7 @@ R_outlier_check_greater15 <- metab_QAQCfin %>%
   filter(R_QAQC > 15)
 head(R_outlier_check_greater15)
 
-#remvoign three values over 19 and after checking daily model fits, and these had poor model fits 
+#remvoign four values over 19 and after checking daily model fits, and these had poor model fits 
 
 metab_QAQCfin2 <- metab_QAQCfin %>% 
   filter(R_QAQC < 19)

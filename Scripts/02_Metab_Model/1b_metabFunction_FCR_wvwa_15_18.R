@@ -54,7 +54,7 @@
 getwd()
 
 setwd(here::here())
-
+getwd()
 #load packages
 library(tidyverse)
 
@@ -360,17 +360,17 @@ for (i in 1:length(unique(solarDaysVec))-1){
   }
 }
 
-##
 #tempProfile - linearly interpolate gaps up to 60 min long 
 
-nCols <- dim(dataTempProfile)[2]
-
-#Loop over the columns of dataTempProfile
-for (i in 2:nCols){
-  dataTemp <- dataTempProfile[,c(1,i)]
-  dataTempFilled <- fillHoles(dataTemp,maxLength=366,timeStep=timeStep)
-  dataTempProfile[,i] <- dataTempFilled[,2]
-}
+ nCols <- dim(dataTempProfile)[2]
+ ## skipping temp interp since this was done in data comp scripts
+ 
+# #Loop over the columns of dataTempProfile
+# for (i in 2:nCols){
+#   dataTemp <- dataTempProfile[,c(1,i)]
+#   dataTempFilled <- fillHoles(dataTemp,maxLength=366,timeStep=timeStep)
+#   dataTempProfile[,i] <- dataTempFilled[,2]
+# }
 
 ########################################
 #Calculate zMix and fluxDummy

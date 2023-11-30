@@ -421,18 +421,39 @@ plot(dailyinterp_toCatwalk_comp$dateTime, dailyinterp_toCatwalk_comp$Diff)
 
 round(rmse(dailyinterp_toCatwalk_comp$ctd_ysi_interp, dailyinterp_toCatwalk_comp$Catwalk), digits = 3)
 
+
+ctdysi_neededtimes <- data.frame(dateTime = seq(ymd_hms("2018-04-23 12:00:00"), ymd_hms("2018-07-06 12:00:00"), by="15 min")) %>% 
+  mutate(Date = as.Date(dateTime))
+
+ctd_ysi_binded_18_daily_interpolated$Date <- as.Date(ctd_ysi_binded_18_daily_interpolated$dateTime)
+  
+ctd_ysi_binded_18_interped_15min <- left_join(ctdysi_neededtimes, ctd_ysi_binded_18_daily_interpolated, by = "Date") %>% 
+  select(-2, -3) %>% 
+  rename(dateTime = 1)
+
+  
+
 ## Put all data together 
+glm_neededtimes <- data.frame(dateTime = seq(ymd_hms("2018-01-15 00:00:00"), ymd_hms("2018-04-22 23:00:00"), by="15 min")) %>% 
+  mutate(Date = as.Date(dateTime))
 
-temp_profiles_18gap_glm_hourly <- temp_profiles_glm_hourly %>% 
-  filter(dateTime >= ymd_hms("2018-01-15 00:00:00"),
-         dateTime <= ymd_hms("2018-04-22 23:50:00")) 
+temp_profiles_18gap_glm_15min <- left_join(glm_neededtimes, temp_profiles_glm_hourly, by = "dateTime")
+
+temp_profiles_18gap_glm_15min$temp0.1 <- na.approx(temp_profiles_18gap_glm_15min$temp0.1)
+temp_profiles_18gap_glm_15min$temp1.0 <- na.approx(temp_profiles_18gap_glm_15min$temp1.0)
+temp_profiles_18gap_glm_15min$temp2.0 <- na.approx(temp_profiles_18gap_glm_15min$temp2.0)
+temp_profiles_18gap_glm_15min$temp3.0 <- na.approx(temp_profiles_18gap_glm_15min$temp3.0)
+temp_profiles_18gap_glm_15min$temp4.0 <- na.approx(temp_profiles_18gap_glm_15min$temp4.0)
+temp_profiles_18gap_glm_15min$temp5.0 <- na.approx(temp_profiles_18gap_glm_15min$temp5.0)
+temp_profiles_18gap_glm_15min$temp6.0 <- na.approx(temp_profiles_18gap_glm_15min$temp6.0)
+temp_profiles_18gap_glm_15min$temp7.0 <- na.approx(temp_profiles_18gap_glm_15min$temp7.0)
+temp_profiles_18gap_glm_15min$temp8.0 <- na.approx(temp_profiles_18gap_glm_15min$temp8.0)
+temp_profiles_18gap_glm_15min$temp9.0 <- na.approx(temp_profiles_18gap_glm_15min$temp9.0)
 
 
-ctd_ysi_binded_18_daily_interpolated_forjoin <- ctd_ysi_binded_18_daily_interpolated %>% 
-  filter(dateTime >= ymd("2018-04-23"),
-         dateTime <= ymd("2018-07-06"))
 
-joined <- dplyr::bind_rows(jan18_hobos, temp_profiles_18gap_glm_hourly, ctd_ysi_binded_18_daily_interpolated_forjoin, scc_thermistors)
+
+joined <- dplyr::bind_rows(jan18_hobos, temp_profiles_18gap_glm_15min, ctd_ysi_binded_18_interped_15min, scc_thermistors)
 
 profiles2018_final <- joined %>% 
   select(dateTime, temp0.1, temp0.8, temp1.0, temp1.6, temp2.0, temp2.8, temp3.0, temp3.8,
