@@ -28,6 +28,7 @@ Next run the following scripts located in './Scripts/03_Data_Analysis/' in order
 
 - 1_Metab_Figures.Rmd is primary data analysis and visualization script 
 - 2_Metab_Envi_Drivers.Rmd conducts environmental driver analysis
+- 3_WinterNEP_simulation.Rmd conducts simulation for how changing days of ice cover affects annual NEP
 
 ## Recreating figures or reruning metabolism models 
 
