@@ -948,7 +948,7 @@ metab2016 <- metab_seasons %>%
   ylim(-3,2)+
   geom_vline(xintercept = as.Date("2016-01-21"))+
   geom_vline(xintercept = as.Date("2016-02-21"))+
-  geom_rect(data= rect1, aes(xmin=as.Date("2016-01-21"), xmax=as.Date("2016-02-21"), ymin=-Inf, ymax=Inf), fill="blue", alpha=0.2, inherit.aes = FALSE)+
+  geom_rect(data= rect1, aes(xmin=as.Date("2016-01-21"), xmax=as.Date("2016-02-21"), ymin=-Inf, ymax=Inf), fill="#FAF9F6", alpha=1, inherit.aes = FALSE)+
   geom_hline(yintercept = 0, linetype=2, size = 1.5) +
   geom_point(shape = 21, color="black", fill ="seagreen3",size=4)+ 
   geom_point(aes(x=Date,y=(R_QAQC*-1)),shape = 21, color = "black", fill ="brown",size=4)+
@@ -956,7 +956,7 @@ metab2016 <- metab_seasons %>%
   #geom_smooth(aes(x=Date, y=NEM_QAQC))+
   geom_line(aes(x = Date, y = NEP_7day_rollmean), size = 2, color = "black", alpha = 0.8)+ #7 day rolling mean
   scale_x_date(breaks = seq(min(ymd("2015-12-20")), max(ymd("2016-02-22")), by = "21 days") , date_labels = "%d %b")+
-  theme_bw()+
+  theme_bw(base_size = 18)+
   # theme(axis.title.x = element_text(size=18),
   #       axis.title.y = element_text(size=18),
   #       plot.title = element_text(size = 18),
@@ -968,11 +968,15 @@ metab2016 <- metab_seasons %>%
         #axis.line = element_line(color="black"),
         axis.ticks.length = unit(.2, "cm"),
         plot.background = element_blank(),
+        panel.background = element_rect(fill = "skyblue2"),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank()) +
   ggtitle("2016 Winter")
 
 metab2016
+
+#   scale_fill_manual(values=c("#FAF9F6", "skyblue2"))
+
 
 
 #Bind together each plot and make final figure 
@@ -981,7 +985,7 @@ metab2016
 (metab2016 + metab2018 + metab2019) / (metab2020 + metab2021 + metab2022)
  grid::grid.draw(grid::textGrob(metab_label2, x = 0.01, rot = 90, gp = grid::gpar(fontsize = 11)))
 #then have to manually export from plots window as png w/ 
-# ggsave("../../Figures/MS_final/WinterTS_fig3.png", width = 800, height = 500, units = "mm")
+# ggsave("../../Figures/WinterTS_fig3.png", width = 800, height = 500, units = "mm")
 
 
 
@@ -1091,7 +1095,7 @@ binded_icedata_remove_zeros <- binded_icedata %>%
   mutate(icevector_yn = ifelse(icevector == 1, "On", "Off"))  #filter(icevector == 1)
 
 
-icecover_dotplots_B <- binded_icedata_remove_zeros %>% 
+icecover_dotplots_B <-  binded_icedata_remove_zeros %>% 
   mutate(icevector_yn_A = ifelse(icevector_yn == "Off", "No Ice Cover", "Ice Cover")) %>% 
   dplyr::mutate(Day = day(Date),
                 # Month_Date = paste(Month, Day, sep = "-"),
@@ -1103,8 +1107,8 @@ icecover_dotplots_B <- binded_icedata_remove_zeros %>%
          fakeDate <= ymd("2024-02-22")) %>% 
   ggplot(mapping = aes(x = fakeDate, y = corrected_years))+
   geom_tile(aes(fill = as.character(icevector_yn_A)))+ #, alpha = 0.2
-  # scale_x_continuous(limits = c(0,125), breaks = c(0, 30, 60, 90, 120))+
-  scale_x_date(breaks = seq(min(ymd("2023-12-20")), max(ymd("2024-02-22")), by = "21 days") , date_labels = "%d %b")+
+  scale_x_date(breaks = seq(min(ymd("2023-12-20")), max(ymd("2024-02-22")), by = "21 days") , date_labels = "%d %b", expand = c(0,0))+
+  scale_y_discrete(expand=c(0,0))+ #remove space on either end of y axis
   labs(fill = element_blank(),
        x = element_blank(), y = "Winter Season")+
   geom_hline(yintercept=7.5, linewidth = 1)+
@@ -1134,8 +1138,8 @@ icecover_dotplots_B <- binded_icedata_remove_zeros %>%
 
 icecover_dotplots_B
 
-ggsave(filename = "../../Figures/Fig1b_icecover.png",
-       icecover_dotplots_B, device = "png", width = 10.6, height = 20, units = "in")
+# ggsave(filename = "../../Figures/Fig1b_icecover.png",
+#        icecover_dotplots_B, device = "png", width = 10.6, height = 20, units = "in")
 
 ```
 
