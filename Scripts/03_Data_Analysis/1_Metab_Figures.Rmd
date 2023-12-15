@@ -230,8 +230,8 @@ fig2_data_solar <- left_join(fig2_all_seasons_data_solar, fig2_nowinter_data_sol
 
 Fig_S4 <- x | w | y | z
 
-# ggsave(filename = "../../Figures/Fig_S4_SeasonsTestsFig2.png",
-#        Fig_S4, device = "png", width = 400, height = 250, units = "mm")
+# ggsave(filename = "../../Figures/Fig_S4_SeasonsTestsFig2.jpg",
+#        Fig_S4, device = "jpg", width = 400, height = 250, units = "mm")
 
 ```
 
@@ -309,7 +309,7 @@ t.test(fig2_data_ttest$annual_NEP_nowinter, fig2_data_ttest$annual_NEP_Allseason
 
 
 ### adding just winter to the figure 
- level_fig2 <- c("All Seasons", "No Winter", "Just Winter")
+ level_fig2 <- c("All Seasons", "No Winter", "Winter Only")
  
 fig2_winterVSnowinter_vsjustwinter <- fig2_data_operational %>% 
   filter(corrected_Year %in% c(2016,2018,2019,2020,2021)) %>% 
@@ -317,11 +317,11 @@ fig2_winterVSnowinter_vsjustwinter <- fig2_data_operational %>%
   pivot_longer(-1) %>% 
     mutate(name = ifelse(name == "annual_NEP_Allseasons", "All Seasons", name),
            name = ifelse(name == "annual_NEP_nowinter", "No Winter", name),
-           name = ifelse(name == "annual_NEP_justwinter", "Just Winter", name)) %>% 
+           name = ifelse(name == "annual_NEP_justwinter", "Winter Only", name)) %>% 
   ggplot(mapping = aes(x= factor(name, level = level_fig2), y = value))+
   geom_boxplot()+
   geom_jitter(aes(color = as.factor(corrected_Year)), size = 4, position=position_jitter(0))+
-    stat_compare_means(method = "kruskal.test", label.y = -0.32, label.x = 1.3, size = 6)+
+    stat_compare_means(method = "kruskal.test", label.y = -0.35, label.x = 1.3, size = 6)+
   labs(x = element_blank(), y = nep_label,
        color = element_blank())+
   scale_x_discrete(labels = label_wrap_gen(3))+
@@ -385,8 +385,8 @@ full_ts <- ggplot(data = metab_seasons, aes(x = Date, y = GPP_QAQC))+
 full_ts
 
 
-# ggsave(filename = "../../Figures/MS_drafts/GPP_R_full_timeseries_NEP7day.png",       
-#        full_ts, device = "png", width = 230, height = 150, units = "mm")
+# ggsave(filename = "../../Figures/MS_drafts/GPP_R_full_timeseries_NEP7day.jpg",       
+#        full_ts, device = "jpg", width = 230, height = 150, units = "mm")
 
 
 NEP_full_ts <- metab_seasons %>% 
@@ -430,15 +430,15 @@ NEP_full_ts
 #   plot_layout(widths = unit(c(5,2),c("null","null"))) +  plot_annotation(tag_levels = 'a') & theme(plot.tag = element_text(size = 24))
 # fig2
 # 
-# # ggsave(filename = "../../Figures/MS_drafts/Fig2_median.png",
-# #        fig2, device = "png", width = 350, height = 200, units = "mm")
+# # ggsave(filename = "../../Figures/MS_drafts/Fig2_median.jpg",
+# #        fig2, device = "jpg", width = 350, height = 200, units = "mm")
 
 GPP_R_overNEP <- (full_ts / NEP_full_ts) #+ plot_annotation(tag_levels = 'a') & theme(plot.tag = element_text(size = 24))
 
 fig2_withNEPpannel <- cowplot::plot_grid(GPP_R_overNEP , fig2_winterVSnowinter_vsjustwinter, rel_widths = c(6,4))
 
-# ggsave(filename = "../../Figures/Fig2.png",
-#        fig2_withNEPpannel, device = "png", width = 350, height = 200, units = "mm")
+# ggsave(filename = "../../Figures/Fig2.jpg",
+#        fig2_withNEPpannel, device = "jpg", width = 350, height = 200, units = "mm")
 
 
 
@@ -634,8 +634,8 @@ dunn <- FSA::dunnTest(NEM_QAQC ~ corrected_Year, data = nep_acrossyears_kruskal_
 
 SupFig_S5 <- gpp_acrossyears_kruskal / r_acrossyears_kruskal / nep_acrossyears_kruskal
 
-# ggsave(filename = "../../Figures/SupFig_S5_metab_acrossyears.png",
-#        SupFig_S5, device = "png", width = 350, height = 200, units = "mm")
+# ggsave(filename = "../../Figures/SupFig_S5_metab_acrossyears.jpg",
+#        SupFig_S5, device = "jpg", width = 350, height = 200, units = "mm")
 
 
 ######################## summary stats by year and season; Sup Fig 6   #######################################
@@ -693,8 +693,8 @@ season_grouping
 # 
 # SupFig_SX_acrossseasons <- gpp_acrossseasons_kruskal / r_acrossseasons_kruskal / nep_acrossseasons_kruskal
 # 
-# ggsave(filename = "../../Figures/SupFig_SX_metab_acrossseasons.png",
-#        SupFig_SX_acrossseasons, device = "png", width = 350, height = 200, units = "mm")
+# ggsave(filename = "../../Figures/SupFig_SX_metab_acrossseasons.jpg",
+#        SupFig_SX_acrossseasons, device = "jpg", width = 350, height = 200, units = "mm")
 
 
 ```
@@ -757,8 +757,8 @@ metab2022 <- metab_seasons %>%
   geom_vline(xintercept = ymd("2022-01-13"))+
   geom_vline(xintercept = ymd("2022-01-16"))+   
   geom_vline(xintercept = ymd("2022-02-09"))+ 
-  geom_rect(data= rect1, aes(xmin=as.Date("2022-01-11"), xmax=as.Date("2022-01-13"), ymin= -Inf, ymax=Inf), fill="blue", alpha=0.2, inherit.aes = FALSE) +
-  geom_rect(data= rect2, aes(xmin= as.Date("2022-01-16"), xmax= as.Date("2022-02-09"), ymin= -Inf, ymax=Inf), fill="blue", alpha=0.2, inherit.aes = FALSE) +
+  geom_rect(data= rect1, aes(xmin=as.Date("2022-01-11"), xmax=as.Date("2022-01-13"), ymin= -Inf, ymax=Inf), fill="#FAF9F6", alpha=1, inherit.aes = FALSE) +
+  geom_rect(data= rect2, aes(xmin= as.Date("2022-01-16"), xmax= as.Date("2022-02-09"), ymin= -Inf, ymax=Inf), fill="#FAF9F6", alpha=1, inherit.aes = FALSE) +
   # labs(y=metab_label, x=NULL)+ 
   labs(y=NULL, x=NULL)+
   geom_hline(yintercept = 0, linetype=2, size = 1.5) +
@@ -768,18 +768,12 @@ metab2022 <- metab_seasons %>%
   #geom_smooth(aes(x=Date, y=NEM_QAQC))+
   geom_line(aes(x = Date, y = NEP_7day_rollmean), size = 2, color = "black", alpha = 0.8)+ #7 day rolling mean
   scale_x_date(breaks = seq(min(ymd("2021-12-20")), max(ymd("2022-02-22")), by = "21 days") , date_labels = "%d %b")+
-  theme_bw()+
-  # theme(axis.title.x = element_text(size=18),
-  #       axis.title.y = element_text(size=18),
-  #       plot.title = element_text(size = 18),
-  #       #axis.text.x = element_blank(),
-  #       axis.text.x = element_text(size=18, color="black",margin = margin(b=10,t=5, unit = "pt")),
-  #       axis.text.y = element_text(size=18, color="black",margin = margin(l=10,r=5, unit = "pt")),
-  #       )+
-  theme(panel.border = element_rect(color = "black", size =1),
+ theme_bw(base_size = 22)+
+   theme(panel.border = element_rect(color = "black", size =1),
         #axis.line = element_line(color="black"),
         axis.ticks.length = unit(.2, "cm"),
         plot.background = element_blank(),
+        panel.background = element_rect(fill = "skyblue2"),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank()) +
   ggtitle("2022 Winter")
@@ -799,9 +793,9 @@ metab2021 <- metab_seasons %>%
   geom_vline(xintercept = ymd("2021-02-08"))+ 
   geom_vline(xintercept = ymd("2021-02-11"))+   
   geom_vline(xintercept = ymd("2021-02-22"))+ 
-  geom_rect(data= rect1, aes(xmin=as.Date("2020-12-27"), xmax=as.Date("2020-12-29"), ymin=-Inf, ymax=Inf), fill="blue", alpha=0.2, inherit.aes = FALSE) +
-  geom_rect(data= rect2, aes(xmin= as.Date("2021-01-10 00:00:00"), xmax= as.Date("2021-02-08 00:00:00"), ymin=-Inf, ymax=Inf), fill="blue", alpha=0.2, inherit.aes = FALSE) +
-  geom_rect(data= rect3, aes(xmin= as.Date("2021-02-11 00:00:00"), xmax= as.Date("2021-02-22 00:00:00"), ymin=-Inf, ymax=Inf), fill="blue", alpha=0.2, inherit.aes = FALSE) +
+  geom_rect(data= rect1, aes(xmin=as.Date("2020-12-27"), xmax=as.Date("2020-12-29"), ymin=-Inf, ymax=Inf), fill="#FAF9F6", alpha=1, inherit.aes = FALSE) +
+  geom_rect(data= rect2, aes(xmin= as.Date("2021-01-10 00:00:00"), xmax= as.Date("2021-02-08 00:00:00"), ymin=-Inf, ymax=Inf), fill="#FAF9F6", alpha=1, inherit.aes = FALSE) +
+  geom_rect(data= rect3, aes(xmin= as.Date("2021-02-11 00:00:00"), xmax= as.Date("2021-02-22 00:00:00"), ymin=-Inf, ymax=Inf), fill="#FAF9F6", alpha=1, inherit.aes = FALSE) +
   # labs(y=metab_label, x=NULL)+ 
   labs(y=NULL, x=NULL)+   
   geom_hline(yintercept = 0, linetype=2, size = 1.5) +
@@ -811,20 +805,14 @@ metab2021 <- metab_seasons %>%
   #geom_smooth(aes(x=Date, y=NEM_QAQC))+
   geom_line(aes(x = Date, y = NEP_7day_rollmean), size = 2, color = "black", alpha = 0.8)+ #7 day rolling mean
   scale_x_date(breaks = seq(min(ymd("2020-12-20")), max(ymd("2021-02-22")), by = "21 days") , date_labels = "%d %b")+
-  theme_bw()+
-  # theme(axis.title.x = element_text(size=18),
-  #       axis.title.y = element_text(size=18),
-  #       plot.title = element_text(size = 18),
-  #       #axis.text.x = element_blank(),
-  #       axis.text.x = element_text(size=18, color="black",margin = margin(b=10,t=5, unit = "pt")),
-  #       axis.text.y = element_text(size=18, color="black",margin = margin(l=10,r=5, unit = "pt")),
-  #       )+
-  theme(panel.border = element_rect(color = "black", size =1),
+ theme_bw(base_size = 22)+
+   theme(panel.border = element_rect(color = "black", size =1),
         #axis.line = element_line(color="black"),
         axis.ticks.length = unit(.2, "cm"),
         plot.background = element_blank(),
+        panel.background = element_rect(fill = "skyblue2"),
         panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank()) +
+        panel.grid.minor = element_blank())+
   ggtitle("2021 Winter")
 
 metab2021
@@ -837,7 +825,7 @@ metab2020 <- metab_seasons %>%
   # scale_y_continuous(limits=c(-7,2), breaks=seq(-7,5, by=1))+
   ylim(-3,2)+
   #labs(y=metab_label, x=NULL)+
-  labs(y=NULL, x=NULL)+
+  labs(y=metab_label2, x=NULL)+
   geom_hline(yintercept = 0, linetype=2, size = 1.5) +
   geom_point(shape = 21, color="black", fill ="seagreen3",size=4)+ 
   geom_point(aes(x=Date,y=(R_QAQC*-1)),shape = 21, color = "black", fill ="brown",size=4)+
@@ -845,19 +833,14 @@ metab2020 <- metab_seasons %>%
   #geom_smooth(aes(x=Date, y=NEM_QAQC))+
   geom_line(aes(x = Date, y = NEP_7day_rollmean), size = 2, color = "black", alpha = 0.8)+ #7 day rolling mean
   scale_x_date(breaks = seq(min(ymd("2019-12-20")), max(ymd("2020-02-22")), by = "21 days") , date_labels = "%d %b")+
-  theme_bw()+
-  # theme(axis.title.x = element_text(size=18),
-  #       axis.title.y = element_text(size=18),
-  #       plot.title = element_text(size = 18),
-  #       #axis.text.x = element_blank(),
-  #       axis.text.x = element_text(size=18, color="black",margin = margin(b=10,t=5, unit = "pt")),
-  #       axis.text.y = element_text(size=18, color="black",margin = margin(l=10,r=5, unit = "pt")),
-  #       )+
-  theme(panel.border = element_rect(color = "black", size =1),
+ theme_bw(base_size = 22)+
+   theme(panel.border = element_rect(color = "black", size =1),
         #axis.line = element_line(color="black"),
         axis.ticks.length = unit(.2, "cm"),
         plot.background = element_blank(),
+        panel.background = element_rect(fill = "skyblue2"),
         panel.grid.major = element_blank(),
+              axis.title.y = element_text(hjust = -0.5),
         panel.grid.minor = element_blank()) +
   ggtitle("2020 Winter")
 
@@ -875,8 +858,8 @@ metab2019 <- metab_seasons %>%
   geom_vline(xintercept = as.Date("2019-01-24"))+
   geom_vline(xintercept = as.Date("2019-01-27"))+   #ice on 1/27/19 and off 2/2/2019
   geom_vline(xintercept = as.Date("2019-02-02"))+ 
-  geom_rect(data= rect1, aes(xmin=as.Date("2019-01-21"), xmax=as.Date("2019-01-24"), ymin=-Inf, ymax=Inf), fill="blue", alpha=0.2, inherit.aes = FALSE) +
-  geom_rect(data= rect2, aes(xmin=as.Date("2019-01-27"), xmax=as.Date("2019-02-02"), ymin=-Inf, ymax=Inf), fill="blue", alpha=0.2, inherit.aes = FALSE) +
+  geom_rect(data= rect1, aes(xmin=as.Date("2019-01-21"), xmax=as.Date("2019-01-24"), ymin=-Inf, ymax=Inf), fill="#FAF9F6", alpha=1, inherit.aes = FALSE) +
+  geom_rect(data= rect2, aes(xmin=as.Date("2019-01-27"), xmax=as.Date("2019-02-02"), ymin=-Inf, ymax=Inf), fill="#FAF9F6", alpha=1, inherit.aes = FALSE) +
   geom_hline(yintercept = 0, linetype=2, size = 1.5) +
   geom_point(shape = 21, color="black", fill ="seagreen3",size=4)+ 
   geom_point(aes(x=Date,y=(R_QAQC*-1)),shape = 21, color = "black", fill ="brown",size=4)+
@@ -884,18 +867,12 @@ metab2019 <- metab_seasons %>%
   #geom_smooth(aes(x=Date, y=NEM_QAQC))+
   geom_line(aes(x = Date, y = NEP_7day_rollmean), size = 2, color = "black", alpha = 0.8)+ #7 day rolling mean
   scale_x_date(breaks = seq(min(ymd("2018-12-20")), max(ymd("2019-02-22")), by = "21 days") , date_labels = "%d %b")+
-  theme_bw()+
-  # theme(axis.title.x = element_text(size=18),
-  #       axis.title.y = element_text(size=18),
-  #       plot.title = element_text(size = 18),
-  #       axis.text.x = element_blank(),
-  #       #axis.text.x = element_text(size=18, color="black",margin = margin(b=10,t=5, unit = "pt")),
-  #       axis.text.y = element_text(size=18, color="black",margin = margin(l=10,r=5, unit = "pt")),
-  #       )+
-  theme(panel.border = element_rect(color = "black", size =1),
+ theme_bw(base_size = 22)+
+   theme(panel.border = element_rect(color = "black", size =1),
         #axis.line = element_line(color="black"),
         axis.ticks.length = unit(.2, "cm"),
         plot.background = element_blank(),
+        panel.background = element_rect(fill = "skyblue2"),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank()) +
   ggtitle("2019 Winter")
@@ -911,7 +888,7 @@ metab2018 <- metab_seasons %>%
   ylim(-3,2)+
   geom_vline(xintercept = as.Date("2017-12-28"))+   
   geom_vline(xintercept = as.Date("2018-01-08"))+
-  geom_rect(data= rect1, aes(xmin=as.Date("2017-12-28"), xmax=as.Date("2018-01-08"), ymin=-Inf, ymax=Inf), fill="blue", alpha=0.2, inherit.aes = FALSE)+
+  geom_rect(data= rect1, aes(xmin=as.Date("2017-12-28"), xmax=as.Date("2018-01-08"), ymin=-Inf, ymax=Inf), fill="#FAF9F6", alpha=1, inherit.aes = FALSE)+
   labs(y=NULL, x=NULL)+   
   geom_hline(yintercept = 0, linetype=2, size = 1.5) +
   geom_point(shape = 21, color="black", fill ="seagreen3",size=4)+ 
@@ -920,25 +897,19 @@ metab2018 <- metab_seasons %>%
   #geom_smooth(aes(x=Date, y=NEM_QAQC))+
   geom_line(aes(x = Date, y = NEP_7day_rollmean), size = 2, color = "black", alpha = 0.8)+ #7 day rolling mean
   scale_x_date(breaks = seq(min(ymd("2017-12-20")), max(ymd("2018-02-22")), by = "21 days") , date_labels = "%d %b")+
-  theme_bw()+
-  # theme(axis.title.x = element_text(size=18),
-  #       axis.title.y = element_text(size=18),
-  #       plot.title = element_text(size = 18),
-  #       axis.text.x = element_blank(),
-  #       #axis.text.x = element_text(size=18, color="black",margin = margin(b=10,t=5, unit = "pt")),
-  #       axis.text.y = element_text(size=18, color="black",margin = margin(l=10,r=5, unit = "pt")),
-  #       )+
-  theme(panel.border = element_rect(color = "black", size =1),
+  theme_bw(base_size = 22)+
+   theme(panel.border = element_rect(color = "black", size =1),
         #axis.line = element_line(color="black"),
         axis.ticks.length = unit(.2, "cm"),
         plot.background = element_blank(),
+        panel.background = element_rect(fill = "skyblue2"),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank()) +
   ggtitle("2018 Winter")
 
 metab2018
 
-#2016; skipping 17 since missing driver met data
+#2016
 metab2016 <- metab_seasons %>% 
   filter(Date <= ymd("2016-02-22"),
          Date >= ymd("2015-12-20")) %>% 
@@ -956,36 +927,28 @@ metab2016 <- metab_seasons %>%
   #geom_smooth(aes(x=Date, y=NEM_QAQC))+
   geom_line(aes(x = Date, y = NEP_7day_rollmean), size = 2, color = "black", alpha = 0.8)+ #7 day rolling mean
   scale_x_date(breaks = seq(min(ymd("2015-12-20")), max(ymd("2016-02-22")), by = "21 days") , date_labels = "%d %b")+
-  theme_bw(base_size = 18)+
-  # theme(axis.title.x = element_text(size=18),
-  #       axis.title.y = element_text(size=18),
-  #       plot.title = element_text(size = 18),
-  #       axis.text.x = element_blank(),
-  #       #axis.text.x = element_text(size=18, color="black",margin = margin(b=10,t=5, unit = "pt")),
-  #       axis.text.y = element_text(size=18, color="black",margin = margin(l=10,r=5, unit = "pt")),
-  #       )+
+  theme_bw(base_size = 22)+
    theme(panel.border = element_rect(color = "black", size =1),
         #axis.line = element_line(color="black"),
         axis.ticks.length = unit(.2, "cm"),
         plot.background = element_blank(),
         panel.background = element_rect(fill = "skyblue2"),
         panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank()) +
+        #axis.title.y = element_text(hjust = -0.00000000000001),
+                panel.grid.minor = element_blank()
+        ) +
   ggtitle("2016 Winter")
 
 metab2016
-
-#   scale_fill_manual(values=c("#FAF9F6", "skyblue2"))
 
 
 
 #Bind together each plot and make final figure 
 
-##run these two lines in the console
-(metab2016 + metab2018 + metab2019) / (metab2020 + metab2021 + metab2022)
- grid::grid.draw(grid::textGrob(metab_label2, x = 0.01, rot = 90, gp = grid::gpar(fontsize = 11)))
-#then have to manually export from plots window as png w/ 
-# ggsave("../../Figures/WinterTS_fig3.png", width = 800, height = 500, units = "mm")
+fig3 <- (metab2016 + metab2018 + metab2019) / (metab2020 + metab2021 + metab2022)
+
+ggsave(filename = "../../Figures/Fig3_Fin.jpg",
+       fig3, device = "jpg", width = 350, height = 200, units = "mm")
 
 
 
@@ -1107,7 +1070,7 @@ icecover_dotplots_B <-  binded_icedata_remove_zeros %>%
          fakeDate <= ymd("2024-02-22")) %>% 
   ggplot(mapping = aes(x = fakeDate, y = corrected_years))+
   geom_tile(aes(fill = as.character(icevector_yn_A)))+ #, alpha = 0.2
-  scale_x_date(breaks = seq(min(ymd("2023-12-20")), max(ymd("2024-02-22")), by = "21 days") , date_labels = "%d %b", expand = c(0,0))+
+  scale_x_date(breaks = seq(min(ymd("2023-12-20")), max(ymd("2024-02-22")), by = "28 days") , date_labels = "%d %b", expand = c(0,0))+
   scale_y_discrete(expand=c(0,0))+ #remove space on either end of y axis
   labs(fill = element_blank(),
        x = element_blank(), y = "Winter Season")+
@@ -1138,8 +1101,8 @@ icecover_dotplots_B <-  binded_icedata_remove_zeros %>%
 
 icecover_dotplots_B
 
-# ggsave(filename = "../../Figures/Fig1b_icecover.png",
-#        icecover_dotplots_B, device = "png", width = 10.6, height = 20, units = "in")
+ # ggsave(filename = "../../Figures/Fig1b_icecover.jpg",
+ #        icecover_dotplots_B, device = "jpg", width = 10.6, height = 20, units = "in")
 
 ```
 
@@ -1161,27 +1124,27 @@ winterNEP <- metab_seasons %>%
 wintercomp_byyear_NEP <- winterNEP %>% 
   mutate(Ice_on_off = ifelse(icevector == 1, "Ice", "No Ice")) %>% 
   ggplot(aes(x = as.factor(Ice_on_off), y = NEM_QAQC, fill = Ice_on_off))+ # , fill = Ice_on_off
-  geom_boxplot(alpha = 0.5)+
+  geom_boxplot(alpha = 1)+
   geom_jitter(position=position_jitter(0.1))+
   facet_wrap(~corrected_Year, scales = "fixed", nrow = 1)+
   labs(x = element_blank(),  y = nep_label)+
   geom_hline(yintercept = 0, linetype=2, size = 0.75) +
   # stat_compare_means(method = "wilcox.test", aes(label = paste0("p = ", after_stat(p.format))), 
   #                    label.y = -6, label.x = 1, size = 6 )+
-   stat_compare_means(method = "wilcox.test", label.y = -6, label.x = 1, size = 6, aes(label = sprintf("p = %5.2f", as.numeric(..p.format..))))+ #round to 2 digits
+   stat_compare_means(method = "wilcox.test", label.y = -7.8, label.x = 1, size = 6, aes(label = sprintf("p = %5.2f", as.numeric(..p.format..))))+ #round to 2 digits
   theme_bw(base_size = 18)+
   theme(legend.position = "top",
         axis.title.y = element_text(size=14),
         panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
   guides(fill = FALSE) + #remove ice on off from legend since its already on x axis
-  scale_fill_manual(values = c( "blue", "gray"))
+  scale_fill_manual(values = c( "#FAF9F6", "skyblue2"))
 
 #wintercomp_byyear_NEP
 
 wintercomp_byyear_GPP <- winterNEP %>% 
   mutate(Ice_on_off = ifelse(icevector == 1, "Ice", "No Ice")) %>% 
   ggplot(aes(x = as.factor(Ice_on_off), y = GPP_QAQC, fill = Ice_on_off))+ # , fill = Ice_on_off
-  geom_boxplot(alpha = 0.5)+
+  geom_boxplot(alpha = 1)+
   geom_jitter(position=position_jitter(0.1))+
   facet_wrap(~corrected_Year, scales = "fixed", nrow = 1)+
   labs(x = element_blank(),  y = gpp_label)+
@@ -1191,14 +1154,14 @@ wintercomp_byyear_GPP <- winterNEP %>%
   theme(legend.position = "none",
         axis.title.y = element_text(size=14),
         panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
-  scale_fill_manual(values = c( "blue", "gray"))
+  scale_fill_manual(values = c( "#FAF9F6", "skyblue2"))
 
 #wintercomp_byyear_GPP
 
 wintercomp_byyear_R <- winterNEP %>% 
   mutate(Ice_on_off = ifelse(icevector == 1, "Ice", "No Ice")) %>% 
   ggplot(aes(x = as.factor(Ice_on_off), y = R_QAQC, fill = Ice_on_off))+ # , fill = Ice_on_off
-  geom_boxplot(alpha = 0.5)+
+  geom_boxplot(alpha = 1)+
   geom_jitter(position=position_jitter(0.1))+
   facet_wrap(~corrected_Year, scales = "fixed", nrow = 1)+
   labs(x = element_blank(),  y = r_label)+
@@ -1208,14 +1171,14 @@ wintercomp_byyear_R <- winterNEP %>%
   theme(legend.position = "none",
         axis.title.y = element_text(size=14),
         panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
-  scale_fill_manual(values = c( "blue", "gray"))
+  scale_fill_manual(values = c( "#FAF9F6", "skyblue2"))
 
 #wintercomp_byyear_R
 
 wintercomps_byyears <- wintercomp_byyear_NEP / wintercomp_byyear_R / wintercomp_byyear_GPP
 
-# ggsave(filename = "../../Figures/FigS6_WinterComp_byyears.png",
-#         wintercomps_byyears, device = "png", width = 350, height = 200, units = "mm")
+# ggsave(filename = "../../Figures/FigS6_WinterComp_byyears.jpg",
+#         wintercomps_byyears, device = "jpg", width = 350, height = 200, units = "mm")
 
 ### Winter NEP average to year 
 wintercomp_acrossyears <- winterNEP %>% 
@@ -1223,23 +1186,23 @@ wintercomp_acrossyears <- winterNEP %>%
   summarise(NEP = mean(NEM_QAQC, na.rm = T)) %>% 
   mutate(Ice_on_off = ifelse(icevector == 1, "Ice", "No Ice")) %>% 
   ggplot(aes(x = as.factor(Ice_on_off), y = NEP, fill = Ice_on_off))+   # , fill = Ice_on_off
-  geom_boxplot(position = position_dodge(preserve = "single"), alpha = 0.5, outlier.alpha = 0.5)+   #, outlier.alpha = 0
+  geom_boxplot(position = position_dodge(preserve = "single"), alpha = 1, outlier.alpha = 0.5)+   #, outlier.alpha = 0
   geom_jitter(aes(shape = as.character(corrected_Year)) , position=position_jitter(0.1), size = 4, fill = "white")+
   scale_shape_manual(values = c(0,1,2,5,6,7)) +
   # stat_summary(fun = mean, geom="point", shape=22, size=5, color="black", fill="black") + #point mean
   geom_hline(yintercept = 0, linetype=2, size = 0.75) +
   #stat_compare_means(method = "wilcox.test", label.y = 0.4, label.x = 1, size = 6,  aes(label = ..p.format..))+
-  stat_compare_means(method = "wilcox.test", label.y = 0.4, label.x = 1, size = 6, aes(label = sprintf("Wilcoxon, p = %5.2f", as.numeric(..p.format..))))+ #round to 2 digits
+  stat_compare_means(method = "wilcox.test", label.y = -1.5, label.x = 1, size = 6, aes(label = sprintf("Wilcoxon, p = %5.2f", as.numeric(..p.format..))))+ #round to 2 digits
   ylim(-1.5, 0.5)+
   labs(fill = element_blank(),
        shape = "Year",
        x = element_blank(),
        y = nep_label)+
-  theme_bw(base_size = 14)+
+  theme_bw(base_size = 18)+
   theme(legend.position = "right",
         panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
   guides(fill = FALSE) + #remove ice on off from legend since its already on x axis
-  scale_fill_manual(values = c( "blue", "gray"))
+  scale_fill_manual(values = c( "#FAF9F6", "skyblue2"))
   
 wintercomp_acrossyears
   
@@ -1326,8 +1289,8 @@ Rseasonscomp_byyear <- boxdata %>%
 
 seasonscomp_byyear_SuppFig <- seasonscomp_byyear_NEP / GPPseasonscomp_byyear / Rseasonscomp_byyear
 
-# ggsave(filename = "../../Figures/SupFigX_SeasonsComp_byyear.png",
-#        seasonscomp_byyear_SuppFig, device = "png", width = 350, height = 200, units = "mm")
+# ggsave(filename = "../../Figures/SupFigX_SeasonsComp_byyear.jpg",
+#        seasonscomp_byyear_SuppFig, device = "jpg", width = 350, height = 200, units = "mm")
 
 
 
@@ -1355,20 +1318,18 @@ left_join(boxdata_grouped, dunnR_seasons_letters_list, by = c("Season" = "Group"
   scale_shape_manual(values = c(0,1,2,5,6,7)) +
   # stat_summary(fun = mean, geom="point", shape=22, size=5, color="black", fill="black") + #point mean
   #stat_compare_means(method = "kruskal.test", label.y = 2.9, label.x = 1.3, size = 6)+
-    stat_compare_means(method = "kruskal.test", label.y = 2.9, label.x = 1.3, size = 6, aes(label = sprintf("Kruskal-Wallis, p = %5.2f", as.numeric(..p.format..))))+ #round to 2 digits
-  geom_text(aes(x = Season, label = Letter), y = 2.75, size = 6)+
-  ylim(0,3)+
+    stat_compare_means(method = "kruskal.test", label.y = -0.2, label.x = 1.3, size = 6, aes(label = sprintf("Kruskal-Wallis, p = %5.2f", as.numeric(..p.format..))))+ #round to 2 digits
+  geom_text(aes(x = Season, label = Letter), y = 2.85, size = 6)+
+  ylim(-0.2,3)+
   labs(fill = element_blank(),
        shape = "Year",
        x = element_blank(),
        y = r_label)+
-  theme_bw(base_size = 14)+
+  theme_bw(base_size = 18)+
   theme(legend.position = "none",
         panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
   guides(fill = FALSE) +
  scale_fill_manual(values = c( "darkorange3", "darkturquoise", "green4", "slategray"))
-
-
 
 
 # Seasonal GPP across years 
@@ -1387,14 +1348,14 @@ GPPseasonscomp_acrossyears <-
   scale_shape_manual(values = c(0,1,2,5,6,7)) +
   # stat_summary(fun = mean, geom="point", shape=22, size=5, color="black", fill="black") + #point mean
   #stat_compare_means(method = "kruskal.test", label.y = 2.9, label.x = 1.3, size = 6)+
-      stat_compare_means(method = "kruskal.test", label.y = 2.9, label.x = 1.3, size = 6, aes(label = sprintf("Kruskal-Wallis, p = %5.2f", as.numeric(..p.format..))))+ #round to 2 digits
-  geom_text(aes(x = Season, label = Letter), y = 2.75, size = 6)+
-  ylim(0,3)+
+      stat_compare_means(method = "kruskal.test", label.y = -0.2, label.x = 1.3, size = 6, aes(label = sprintf("Kruskal-Wallis, p = %5.2f", as.numeric(..p.format..))))+ #round to 2 digits
+  geom_text(aes(x = Season, label = Letter), y = 2.85, size = 6)+
+  ylim(-0.2,3)+
   labs(fill = element_blank(),
        shape = "Year",
        x = element_blank(),
        y = gpp_label)+
-  theme_bw(base_size = 14)+
+  theme_bw(base_size = 18)+
   theme(legend.position = "none",
         panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
   guides(fill = FALSE) +
@@ -1414,13 +1375,13 @@ NEPseasonscomp_acrossyears <- boxdata_grouped %>%
   geom_hline(yintercept = 0, linetype=2, size = 0.75) +
   # stat_summary(fun = mean, geom="point", shape=22, size=5, color="black", fill="black") + #point mean
   #stat_compare_means(method = "kruskal.test", label.y = 0.45, label.x = 1.3, size = 6)+
-      stat_compare_means(method = "kruskal.test", label.y = 0.45, label.x = 1.3, size = 6, aes(label = sprintf("Kruskal-Wallis, p = %5.2f", as.numeric(..p.format..))))+ #round to 2 digits
-  ylim(-1.5, 0.5)+
+      stat_compare_means(method = "kruskal.test", label.y = -1.7, label.x = 1.3, size = 6, aes(label = sprintf("Kruskal-Wallis, p = %5.2f", as.numeric(..p.format..))))+ #round to 2 digits
+  ylim(-1.7, 0.5)+
   labs(fill = element_blank(),
        shape = "Year",
        x = element_blank(),
        y = nep_label)+
-  theme_bw(base_size = 14)+
+  theme_bw(base_size = 18)+
   theme(legend.position = "right",
         panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
   guides(fill = FALSE) +
@@ -1438,14 +1399,15 @@ NEPseasonscomp_acrossyears + GPPseasonscomp_acrossyears + Rseasonscomp_acrossyea
 
 ```{r}
 
-fig4top <- wintercomp_byyear_NEP + wintercomp_acrossyears + plot_layout(widths = c(6,2)) # + plot_annotation(tag_levels = 'A')
+ fig4top <- wintercomp_byyear_NEP + wintercomp_acrossyears + plot_layout(widths = c(7,3)) # can't figure out height curretnly plot_layout(heights = c(0.25, 0.5)) 
+
 
 fig4bot<- Rseasonscomp_acrossyears + GPPseasonscomp_acrossyears + NEPseasonscomp_acrossyears
 
 fig4 <- fig4top / fig4bot + plot_annotation(tag_levels = 'a')
 
-ggsave(filename = "../../Figures/Fig4.png",
-       fig4, device = "png", width = 350, height = 200, units = "mm")
+ggsave(filename = "../../Figures/Fig4_test.jpg",
+       fig4, device = "jpg", width = 350, height = 200, units = "mm")
 
 
 ```
@@ -1496,8 +1458,8 @@ DOprofile_underice <- seasons_do_underice %>%
 
 DOprofile_underice
 
-ggsave(filename = "../../Figures/FigS7_DOunderIce.png",
-       DOprofile_underice, device = "png", width = 200, height = 250, units = "mm")
+ggsave(filename = "../../Figures/FigS7_DOunderIce.jpg",
+       DOprofile_underice, device = "jpg", width = 200, height = 250, units = "mm")
   
 #### Temp 
 temp_underice <- edi_catwalk %>% 
