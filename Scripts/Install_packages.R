@@ -18,8 +18,7 @@ install.packages('cowplot') #for plot_grid
 install.packages('FSA') #dunn test
 install.packages('Hmisc')  #rcorr
 install.packages('corrplot') #corrplot
-install.packages('MuMIn') #for dredge
+install.packages('MuMIn') #for dredge, needs R version 4.2
 install.packages('here')
 install.packages('rsq')
-install.packages('ggpmisc')
 install.packages("rcompanion")
