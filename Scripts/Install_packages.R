@@ -22,3 +22,4 @@ install.packages('MuMIn') #for dredge
 install.packages('here')
 install.packages('rsq')
 install.packages('ggpmisc')
+install.packages("rcompanion")
