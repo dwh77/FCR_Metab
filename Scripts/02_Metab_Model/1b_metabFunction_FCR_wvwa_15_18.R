@@ -1,3 +1,8 @@
+#### Script adapted from Brentrup et al. 2021 to calculate metabolism rates in lakes and reservoirs
+### Modfied March 2021 by DWH for FCR
+
+
+#### Notes from previous revisions
 #metabFunc_30Jul
 #Script for running metabolism model
 #CTS 14 May 2009
@@ -19,7 +24,7 @@
 #Runs complete data set from August 2007 to Jan 2009 including under ice
 #Updated 14May2018 to incorporate the time series DO correction
 
-#This model version array tells the model what to run for parameter fits
+#### This model version array tells the model what to run for parameter fits
 #ModelVersion[1]
 #If 1, then fit DO initial
 #If 2, then DO initial is first DO value of the day
@@ -48,7 +53,8 @@
 #This is the number of hours after sunrise that we should remove
 #This is to eliminate that odd blip at the beginning of many days
 
-### Modfied March 2021 by DWH for FCR ###
+
+#### Start of script
 
 ## check working directory, if its not at base of project ./FCR_Metabolism, run line 56
 getwd()
