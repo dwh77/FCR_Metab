@@ -397,7 +397,7 @@ for (j in 2:ncol(dataDensProfile)){
   ##End of column for loop
 }
 
-
+#take ~5 min to run
 dataZMix <- calcZMixDens(dataDensProfile)
 
 #Plot zMix
@@ -421,7 +421,7 @@ flux_zmix_dataframe <- cbind(dataZMix, fluxDummy)
 ##as.numeric(as.Date(dataZMix$dateTime)<iceOn)
 
 ###adding in ice on/off vectors 
-#getting 2015 ice cover dates
+#getting 2015-18 ice cover dates
 head(ice)
 head(flux_zmix_dataframe)
 #chaging flux dummy to 0 for days w/ ice cover
@@ -629,7 +629,7 @@ par(mar=c(1,2,0,0)+0.1)
 
 
 ##
-#Run optimization for each day
+#Run optimization for each day; can take 5-30 minutes to run depending on the computer 
 
 for (i in 1:nDays){
   

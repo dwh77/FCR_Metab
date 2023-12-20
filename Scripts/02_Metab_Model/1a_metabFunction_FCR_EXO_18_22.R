@@ -396,13 +396,9 @@ for (j in 2:ncol(dataDensProfile)){
   ##End of column for loop
 }
 
+#takes ~ 5 min to run
+dataZMix <- calcZMixDens(dataDensProfile)
 
-dataZMix <- calcZMixDens(dataDensProfile)#0.285 #was using ', thresh = 0.5' before 
-#added March 2022 by dwh (3 lines below)
-# dataZMix_05 <- calcZMixDens(dataDensProfile, thresh = 0.5)
-# dataZMix_0285 <- calcZMixDens(dataDensProfile, thresh = 0.285)
-# zmix_comp <- left_join(dataZMix, dataZMix_05, by = "dateTime") %>% 
-#   mutate(diff = zMix.x - zMix.y) #zmix is pretty different between these two 
 
 #Plot zMix
 setwd(dirDump)
@@ -411,18 +407,6 @@ pdf(file=paste(outName,'zMix.pdf'))
 plot(zMix~dateTime,data=dataZMix,ylim=c(maxDepth,0))
 dev.off()
 
-#DWH added 3 mar
-#Plot zMix givne diff thresh value: thresh = 0.5
-# maxDepth <- max(as.numeric(substr(colnames(dataTempProfile)[2:nCols],5,10)))
-# pdf(file=paste(outName,'zMix_thresh0.5.pdf'))
-# plot(zMix~dateTime,data=dataZMix_05,ylim=c(maxDepth,0))
-# dev.off()
-
-#Plot zMix given diff thresh value: thresh = 0.285
-# maxDepth <- max(as.numeric(substr(colnames(dataTempProfile)[2:nCols],5,10)))
-# pdf(file=paste(outName,'zMix_thresh0.285.pdf'))
-# plot(zMix~dateTime,data=dataZMix_0285,ylim=c(maxDepth,0))
-# dev.off()
 
 #Identify when to shut off atmospheric flux
 #If zMix > sensorDepth, then sensor is in mixed layer and fluxDummy = 1
@@ -438,7 +422,7 @@ flux_zmix_dataframe <- cbind(dataZMix, fluxDummy)
 ##as.numeric(as.Date(dataZMix$dateTime)<iceOn)
 
 ###adding in ice on/off vectors 
-#getting 2019 ice cover dates
+#getting 2018-22 ice cover dates
 head(ice)
 head(flux_zmix_dataframe)
 #chaging flux dummy to 0 for days w/ ice cover
@@ -645,7 +629,7 @@ par(mar=c(1,2,0,0)+0.1)
 
 
 ##
-#Run optimization for each day
+#Run optimization for each day; can take 5-30 minutes depending on computer
 
 for (i in 1:nDays){ #nDays
 
