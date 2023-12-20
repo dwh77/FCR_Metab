@@ -68,17 +68,15 @@ driverdata_corr <- joined_ZT %>%
   mutate(GPPlag = lag(GPP_QAQC,1),
          Rlag = lag(R_QAQC,1),
          NEMlag = lag(NEM_QAQC,1)) %>% 
-  # mutate(Month = month(Date),
-  #        JulianDOY = yday(Date)) %>% 
   select(Date, GPP_QAQC, GPPlag, R_QAQC, Rlag, NEM_QAQC, NEMlag, everything()) %>% 
   filter(  !if_any(c(NEM_QAQC, NEMlag), is.na)  ) %>% 
-  select(-Date) #remvoing date so rcorr runs below
+  select(-Date) #removing date so rcorr runs below
 
 summary(driverdata_corr)
 
 cor_drivers <- rcorr(as.matrix(driverdata_corr), type = "spearman")
 spear_daily <- cor_drivers$r
-# write.csv(spear_daily, "../../Data/Generated_Data/Metab_daily_spear_cor.csv")
+write.csv(spear_daily, "../../Data/Generated_Data/Metab_daily_spear_cor.csv")
 corrplot(spear_daily, method = "number")
 
 
