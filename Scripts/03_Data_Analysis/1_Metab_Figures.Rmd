@@ -1,5 +1,5 @@
 ---
-title: "Metabolism figures from using QAQCd metab model outputs"
+title: "Metabolism figures using QAQCd metab model outputs"
 author: "Dexter Howard"
 date: "9/16/2022"
 output: html_document
@@ -67,20 +67,20 @@ metab_seasons_solar <- left_join(seasons_ts_solar, metaboutput1, by = c("Date" =
 ```
 
 
-## Testing affect of winter on annual metab on seasons classficiations
-for both operational seasons, operation winter and physical summer, phy summer and winter seasons, and solar seasons 
+## Fig S4 Testing affect of winter on annual metab on seasons classficiations
+for both operational seasons, operation winter and physical summer, physical summer and winter seasons, and solar seasons 
 
 ```{r}
 ### current seasons fig
 
-fig2_all_seasons_data_opWint_physSum <- metab_seasons_winterOper_summerPhys %>% 
+all_seasons_data_opWint_physSum <- metab_seasons_winterOper_summerPhys %>% 
   group_by(corrected_Year) %>% 
   dplyr::summarise(annual_GPP_Allseasons = median(GPP_QAQC, na.rm = T),
                    annual_R_Allseasons = median(R_QAQC, na.rm = T),
                    annual_NEP_Allseasons = median(NEM_QAQC, na.rm = T)
                    )
 
-fig2_nowinter_data_opWint_physSum <- metab_seasons_winterOper_summerPhys %>% 
+nowinter_data_opWint_physSum <- metab_seasons_winterOper_summerPhys %>% 
   filter(Season != "Winter") %>% 
   group_by(corrected_Year) %>% 
   dplyr::summarise(annual_GPP_nowinter = median(GPP_QAQC, na.rm = T),
@@ -89,10 +89,10 @@ fig2_nowinter_data_opWint_physSum <- metab_seasons_winterOper_summerPhys %>%
                    )
 
 
-fig2_data_opWint_physSum <- left_join(fig2_all_seasons_data_opWint_physSum, fig2_nowinter_data_opWint_physSum, by = "corrected_Year")
+data_opWint_physSum <- left_join(all_seasons_data_opWint_physSum, nowinter_data_opWint_physSum, by = "corrected_Year")
 
 
- x <- fig2_data_opWint_physSum %>% 
+ x <- data_opWint_physSum %>% 
   filter(corrected_Year %in% c(2016,2018,2019,2021)) %>% 
   select(corrected_Year, annual_NEP_nowinter, annual_NEP_Allseasons) %>% 
   pivot_longer(-1) %>% 
@@ -114,14 +114,14 @@ fig2_data_opWint_physSum <- left_join(fig2_all_seasons_data_opWint_physSum, fig2
 
 
 ### operational winter and summer season fig
-fig2_all_seasons_data_operational <- metab_seasons_operational %>% 
+all_seasons_data_operational <- metab_seasons_operational %>% 
   group_by(cor_Year) %>% 
   dplyr::summarise(annual_GPP_Allseasons = median(GPP_QAQC, na.rm = T),
                    annual_R_Allseasons = median(R_QAQC, na.rm = T),
                    annual_NEP_Allseasons = median(NEM_QAQC, na.rm = T)
                    )
 
-fig2_nowinter_data_operational <- metab_seasons_operational %>% 
+nowinter_data_operational <- metab_seasons_operational %>% 
   filter(Season != "Winter") %>% 
   group_by(cor_Year) %>% 
   dplyr::summarise(annual_GPP_nowinter = median(GPP_QAQC, na.rm = T),
@@ -129,9 +129,9 @@ fig2_nowinter_data_operational <- metab_seasons_operational %>%
                    annual_NEP_nowinter = median(NEM_QAQC, na.rm = T)
                    )
 
-fig2_data_operational <- left_join(fig2_all_seasons_data_operational, fig2_nowinter_data_operational, by = "cor_Year") %>% rename("corrected_Year" = "cor_Year")
+data_operational <- left_join(all_seasons_data_operational, nowinter_data_operational, by = "cor_Year") %>% rename("corrected_Year" = "cor_Year")
 
-w<- fig2_data_operational %>% 
+w <- data_operational %>% 
   filter(corrected_Year %in% c(2016,2018,2019,2021)) %>% 
   select(corrected_Year, annual_NEP_nowinter, annual_NEP_Allseasons) %>% 
   pivot_longer(-1) %>% 
@@ -153,14 +153,14 @@ w<- fig2_data_operational %>%
 
 
 ### Phys winter season fig
-fig2_all_seasons_data_phys <- metab_seasons_phys %>% 
+all_seasons_data_phys <- metab_seasons_phys %>% 
   group_by(cor_Year) %>% 
   dplyr::summarise(annual_GPP_Allseasons = median(GPP_QAQC, na.rm = T),
                    annual_R_Allseasons = median(R_QAQC, na.rm = T),
                    annual_NEP_Allseasons = median(NEM_QAQC, na.rm = T)
                    )
 
-fig2_nowinter_data_phys <- metab_seasons_phys %>% 
+nowinter_data_phys <- metab_seasons_phys %>% 
   filter(Season != "Winter") %>% 
   group_by(cor_Year) %>% 
   dplyr::summarise(annual_GPP_nowinter = median(GPP_QAQC, na.rm = T),
@@ -168,9 +168,9 @@ fig2_nowinter_data_phys <- metab_seasons_phys %>%
                    annual_NEP_nowinter = median(NEM_QAQC, na.rm = T)
                    )
 
-fig2_data_phys <- left_join(fig2_all_seasons_data_phys, fig2_nowinter_data_phys, by = "cor_Year")
+data_phys <- left_join(all_seasons_data_phys, nowinter_data_phys, by = "cor_Year")
 
-y<- fig2_data_phys %>% 
+y<- data_phys %>% 
   filter(cor_Year %in% c(2016,2018,2019,2021)) %>% 
   select(cor_Year, annual_NEP_nowinter, annual_NEP_Allseasons) %>% 
   pivot_longer(-1) %>% 
@@ -191,14 +191,14 @@ y<- fig2_data_phys %>%
 
  
 ### solar winter season fig
-fig2_all_seasons_data_solar <- metab_seasons_solar %>% 
+all_seasons_data_solar <- metab_seasons_solar %>% 
   group_by(cor_Year) %>% 
   dplyr::summarise(annual_GPP_Allseasons = median(GPP_QAQC, na.rm = T),
                    annual_R_Allseasons = median(R_QAQC, na.rm = T),
                    annual_NEP_Allseasons = median(NEM_QAQC, na.rm = T)
                    )
 
-fig2_nowinter_data_solar <- metab_seasons_solar %>% 
+nowinter_data_solar <- metab_seasons_solar %>% 
   filter(Season != "Winter") %>% 
   group_by(cor_Year) %>% 
   dplyr::summarise(annual_GPP_nowinter = median(GPP_QAQC, na.rm = T),
@@ -206,9 +206,9 @@ fig2_nowinter_data_solar <- metab_seasons_solar %>%
                    annual_NEP_nowinter = median(NEM_QAQC, na.rm = T)
                    )
 
-fig2_data_solar <- left_join(fig2_all_seasons_data_solar, fig2_nowinter_data_solar, by = "cor_Year")
+data_solar <- left_join(all_seasons_data_solar, nowinter_data_solar, by = "cor_Year")
 
- z<- fig2_data_solar %>% 
+ z<- data_solar %>% 
   filter(cor_Year %in% c(2016,2018,2019,2021)) %>% 
   select(cor_Year, annual_NEP_nowinter, annual_NEP_Allseasons) %>% 
   pivot_longer(-1) %>% 
@@ -230,27 +230,26 @@ fig2_data_solar <- left_join(fig2_all_seasons_data_solar, fig2_nowinter_data_sol
 
 Fig_S4 <- x | w | y | z
 
-# ggsave(filename = "../../Figures/Fig_S4_SeasonsTestsFig2.jpg",
-#        Fig_S4, device = "jpg", width = 400, height = 250, units = "mm")
+ggsave(filename = "../../Figures/Fig_S4_SeasonsTestsFig2.jpg",
+       Fig_S4, device = "jpg", width = 400, height = 250, units = "mm")
 
 ```
 
 
 
-## Make figure 2b using both operational season
+## Fig 2c; excluding vs including winter 
 
 ```{r}
-
 ### set up data 
 
-fig2_all_seasons_data_operational <- metab_seasons_operational %>% 
+fig2c_all_seasons_data_operational <- metab_seasons_operational %>% 
   group_by(cor_Year) %>% 
   dplyr::summarise(annual_GPP_Allseasons = median(GPP_QAQC, na.rm = T),
                    annual_R_Allseasons = median(R_QAQC, na.rm = T),
                    annual_NEP_Allseasons = median(NEM_QAQC, na.rm = T)
                    )
 
-fig2_nowinter_data_operational <- metab_seasons_operational %>% 
+fig2c_nowinter_data_operational <- metab_seasons_operational %>% 
   filter(Season != "Winter") %>% 
   group_by(cor_Year) %>% 
   dplyr::summarise(annual_GPP_nowinter = median(GPP_QAQC, na.rm = T),
@@ -258,7 +257,7 @@ fig2_nowinter_data_operational <- metab_seasons_operational %>%
                    annual_NEP_nowinter = median(NEM_QAQC, na.rm = T)
                    )
 
-fig2_justwinter_data_operational <- metab_seasons_operational %>% 
+fig2c_justwinter_data_operational <- metab_seasons_operational %>% 
   filter(Season == "Winter") %>% 
   group_by(cor_Year) %>% 
   dplyr::summarise(annual_GPP_justwinter = median(GPP_QAQC, na.rm = T),
@@ -266,59 +265,29 @@ fig2_justwinter_data_operational <- metab_seasons_operational %>%
                    annual_NEP_justwinter = median(NEM_QAQC, na.rm = T)
                    )
 
-fig2_data_operational <- left_join(fig2_all_seasons_data_operational, fig2_nowinter_data_operational, by = "cor_Year") 
-fig2_data_operational <- left_join(fig2_data_operational, fig2_justwinter_data_operational, by = "cor_Year") %>% 
+fig2c_data_operational <- left_join(fig2c_all_seasons_data_operational, fig2c_nowinter_data_operational, by = "cor_Year") 
+fig2c_data_operational <- left_join(fig2c_data_operational, fig2c_justwinter_data_operational, by = "cor_Year") %>% 
   rename("corrected_Year" = "cor_Year")
 
 
 #run t test 
-fig2_data_ttest <- fig2_data_operational %>% 
+fig2c_data_ttest <- fig2c_data_operational %>% 
     filter(corrected_Year %in% c(2016,2018,2019,2020,2021)) 
 
-t.test(fig2_data_ttest$annual_NEP_nowinter, fig2_data_ttest$annual_NEP_Allseasons, paired = T)
-# t.test(fig2_data_ttest$annual_R_nowinter, fig2_data_ttest$annual_R_Allseasons, paired = F)
-# t.test(fig2_data_ttest$annual_GPP_nowinter, fig2_data_ttest$annual_GPP_Allseasons, paired = F)
-
-#NEP plot 
-# fig2_winterVSnowinter <- fig2_data_operational %>% 
-#   filter(corrected_Year %in% c(2016,2018,2019,2020,2021)) %>% 
-#   select(corrected_Year, annual_NEP_nowinter, annual_NEP_Allseasons) %>% 
-#   pivot_longer(-1) %>% 
-#   mutate(name = ifelse(name == "annual_NEP_Allseasons", "All Seasons", "No Winter")) %>% 
-#   ggplot(mapping = aes(x= name, y = value))+
-#   geom_boxplot()+
-#   geom_jitter(aes(color = as.factor(corrected_Year)), size = 4, position=position_jitter(0))+
-#   #stat_compare_means(method = "t.test", paired = T, label.y = 0.1, label.x = 1.3)+ #t test 
-#   # geom_point(aes(x = name, y = value), shape=1, size=6, color="black")+
-#   labs(x = element_blank(), y = nep_label,
-#        color = "Year")+
-#   geom_hline(yintercept = 0, linetype=2, size = 0.75) +
-#   ylim(-0.4, 0.1)+
-#   theme_bw()+
-#   ggtitle("c")+
-#   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-#         axis.line = element_line(color="black"))+
-#   theme(axis.title.x = element_text(size=18),
-#         axis.title.y = element_text(size=18),
-#         legend.title = element_text(size=18),
-#         plot.title = element_text(size=24),
-#         axis.text = element_text(size=18,color="black"),
-#         legend.text = element_text(size=18,color="black"))
-# 
-# fig2_winterVSnowinter
+t.test(fig2c_data_ttest$annual_NEP_nowinter, fig2c_data_ttest$annual_NEP_Allseasons, paired = T)
 
 
 ### adding just winter to the figure 
- level_fig2 <- c("All Seasons", "No Winter", "Winter Only")
+levels_fig2c <- c("All Seasons", "No Winter", "Winter Only")
  
-fig2_winterVSnowinter_vsjustwinter <- fig2_data_operational %>% 
+fig2c_winterVSnowinter_vsjustwinter <- fig2c_data_operational %>% 
   filter(corrected_Year %in% c(2016,2018,2019,2020,2021)) %>% 
   select(corrected_Year, annual_NEP_nowinter, annual_NEP_Allseasons, annual_NEP_justwinter) %>% 
   pivot_longer(-1) %>% 
     mutate(name = ifelse(name == "annual_NEP_Allseasons", "All Seasons", name),
            name = ifelse(name == "annual_NEP_nowinter", "No Winter", name),
            name = ifelse(name == "annual_NEP_justwinter", "Winter Only", name)) %>% 
-  ggplot(mapping = aes(x= factor(name, level = level_fig2), y = value))+
+  ggplot(mapping = aes(x= factor(name, level = levels_fig2c), y = value))+
   geom_boxplot()+
   geom_jitter(aes(color = as.factor(corrected_Year)), size = 4, position=position_jitter(0))+
     stat_compare_means(method = "kruskal.test", label.y = -0.35, label.x = 1.3, size = 6)+
@@ -338,7 +307,7 @@ fig2_winterVSnowinter_vsjustwinter <- fig2_data_operational %>%
         legend.text = element_text(size=13,color="black"))
 
 
-fig2_winterVSnowinter_vsjustwinter
+fig2c_winterVSnowinter_vsjustwinter
 
 
 
@@ -348,11 +317,12 @@ fig2_winterVSnowinter_vsjustwinter
 
 
 
-## Full TS for GPP and R and NEP
+## Fig 2a,b; Full TS for GPP and R and NEP
 
 ```{r}
 # calc to add 7 day NEP rolling mean
 metab_seasons <- metab_seasons_operational %>%
+  rename("corrected_Year" = "cor_Year") %>% 
   mutate(NEP_7day_rollmean = rollmean(NEM_QAQC, 7,
                                        fill = NA,
                                        na.rm = T,
@@ -360,13 +330,10 @@ metab_seasons <- metab_seasons_operational %>%
 
 # make full TS of GPP and R
 full_ts <- ggplot(data = metab_seasons, aes(x = Date, y = GPP_QAQC))+
-  geom_point(shape = 21, color="black", fill ="seagreen3",size=4, alpha = 0.5)+ # green 3,  lightgreen, seagreen3, springgreen3
+  geom_point(shape = 21, color="black", fill ="seagreen3",size=4, alpha = 0.5)+ 
   geom_hline(yintercept = 0, linetype=2, size = 1.5) +
-  geom_point(aes(x=Date,y=(R_QAQC*-1)),shape = 21, color = "black", fill ="brown",size=4, alpha = 0.5)+ #gray30 for darker outline
-  #geom_line(aes(x = Date, y = NEP_7day_rollmean), size = 1, color = "black", alpha = 0.8)+ #7 day rolling mean
-  #geom_smooth(aes(x= Date, y = NEM_QAQC))+
-  scale_x_date(breaks = seq(ymd("2016-01-01"), ymd("2022-03-01"), by="12 months"),date_labels="%Y")+ #date_labels="%b %Y"
-  #scale_y_continuous(limits=c(-15,10), breaks=seq(-30,20, by=5))+
+  geom_point(aes(x=Date,y=(R_QAQC*-1)),shape = 21, color = "black", fill ="brown",size=4, alpha = 0.5)+ 
+  scale_x_date(breaks = seq(ymd("2016-01-01"), ymd("2022-03-01"), by="12 months"),date_labels="%Y")+
   labs(y=metab_label, x=NULL)+ 
   theme_bw()+
   ggtitle("a")+
@@ -383,10 +350,6 @@ full_ts <- ggplot(data = metab_seasons, aes(x = Date, y = GPP_QAQC))+
         )
 
 full_ts
-
-
-# ggsave(filename = "../../Figures/MS_drafts/GPP_R_full_timeseries_NEP7day.jpg",       
-#        full_ts, device = "jpg", width = 230, height = 150, units = "mm")
 
 
 NEP_full_ts <- metab_seasons %>% 
@@ -412,8 +375,6 @@ NEP_full_ts <- metab_seasons %>%
 
 NEP_full_ts
 
-# ggsave(filename = "./Figures/GLEON2022/NEP_full_TS_rollmean.tiff", 
-#        NEP_full_ts, device = "tiff", width = 230, height = 150, units = "mm")
 
 
 ```
@@ -425,24 +386,18 @@ NEP_full_ts
 ## Fig 2 - full TS and NEP summary by year 
 
 ```{r}
+#left panel
+GPP_R_overNEP <- (full_ts / NEP_full_ts) 
 
-# fig2 <- full_ts + fig2_winterVSnowinter + 
-#   plot_layout(widths = unit(c(5,2),c("null","null"))) +  plot_annotation(tag_levels = 'a') & theme(plot.tag = element_text(size = 24))
-# fig2
-# 
-# # ggsave(filename = "../../Figures/MS_drafts/Fig2_median.jpg",
-# #        fig2, device = "jpg", width = 350, height = 200, units = "mm")
+#add right panel 
+fig2_withNEPpannel <- cowplot::plot_grid(GPP_R_overNEP , fig2c_winterVSnowinter_vsjustwinter, rel_widths = c(6,4))
 
-GPP_R_overNEP <- (full_ts / NEP_full_ts) #+ plot_annotation(tag_levels = 'a') & theme(plot.tag = element_text(size = 24))
-
-fig2_withNEPpannel <- cowplot::plot_grid(GPP_R_overNEP , fig2_winterVSnowinter_vsjustwinter, rel_widths = c(6,4))
-
-# ggsave(filename = "../../Figures/Fig2.jpg",
-#        fig2_withNEPpannel, device = "jpg", width = 350, height = 200, units = "mm")
-
-
+#save figure
+ggsave(filename = "../../Figures/Fig2.jpg",
+       fig2_withNEPpannel, device = "jpg", width = 350, height = 200, units = "mm")
 
 ```
+
 
 ## Metab stats for full time series and table 1
 
@@ -452,7 +407,7 @@ fig2_withNEPpannel <- cowplot::plot_grid(GPP_R_overNEP , fig2_winterVSnowinter_v
 metab_seasons_long <- metab_seasons %>% 
   pivot_longer(-c(1:5))
 
-metab_seasons <- metab_seasons %>% rename(corrected_Year = cor_Year) %>% 
+metab_seasons <- metab_seasons %>% 
   filter(Date >= ymd("2015-11-11"),
          Date <= ymd("2022-02-28"))
 
@@ -483,6 +438,8 @@ NEP_cv <- sd(metab_seasons$NEM_QAQC, na.rm = T) / mean(metab_seasons$NEM_QAQC, n
 NEP_cv
 #range(metab_seasons$NEM_QAQC, na.rm = T)
 
+
+#### summer and winter NEP range thats reported in abstract
 #Summer NEP range 
 metab_seasons_long %>% 
   filter(Season == "Summer")  %>% 
@@ -499,7 +456,7 @@ metab_seasons_long %>%
   
 
 
-################# Full timeseries stats - Table 1  ########################
+################## Table 1 - Full timeseries stats 
 
 ## Full timeseries metab summary stats table 
 fullTSgroup <- metab_seasons_long %>% 
@@ -533,7 +490,8 @@ seasons_summaryStats_clean <- metab_seasons_long %>%
   mutate(median_sd = paste(round(median, 2), round(sd, 2), sep = " +- "),
          range =   paste(round(min, 2), round(max, 2), sep = " - ")  ) %>% 
   select(name, Season, median_sd) %>% 
-  pivot_wider(names_from = Season, values_from = median_sd) 
+  pivot_wider(names_from = Season, values_from = median_sd) %>% 
+  select(name, Spring, Summer, Fall, Winter)
   
 
 seasons_summaryStats_clean
@@ -562,10 +520,11 @@ iceonoff_summaryStats_clean
 ```
 
 
-## Yearly stats for supplement table and figures
+## Fig S5, Table S2 and S3
+Yearly stats for supplement table and figures
 
 ```{r}
-################# yearly stats; data for Supplementary table S2; and Supplementary Figure S5 ####################
+################# yearly stats; data for Supplementary table S2; and Supplementary Figure S5 
 #get yearly stats for sup table S2
 yearly_grouping <- metab_seasons %>% 
   group_by(corrected_Year) %>% 
@@ -581,9 +540,10 @@ yearly_grouping <- metab_seasons %>%
             NEP_CV = round(sd(NEM_QAQC, na.rm = T) / mean(NEM_QAQC, na.rm = T), 2)
             ) 
 
+#Table S2
 yearly_grouping
 
-#make figures for sup figure 5
+#Fig S5
 gpp_acrossyears_kruskal <- metab_seasons %>% 
   filter(corrected_Year %in% c(2016, 2018, 2019, 2020, 2021)) %>% 
   ggplot(aes(x = as.factor(corrected_Year), y = GPP_QAQC))+ 
@@ -634,11 +594,11 @@ dunn <- FSA::dunnTest(NEM_QAQC ~ corrected_Year, data = nep_acrossyears_kruskal_
 
 SupFig_S5 <- gpp_acrossyears_kruskal / r_acrossyears_kruskal / nep_acrossyears_kruskal
 
-# ggsave(filename = "../../Figures/SupFig_S5_metab_acrossyears.jpg",
-#        SupFig_S5, device = "jpg", width = 350, height = 200, units = "mm")
+ggsave(filename = "../../Figures/Fig_S5_metab_acrossyears.jpg",
+       SupFig_S5, device = "jpg", width = 350, height = 200, units = "mm")
 
 
-######################## summary stats by year and season; Sup Fig 6   #######################################
+######################## summary stats by year and season; Sup Fig 6   
 #make table that has summary stats for each season per year 
 season_grouping <- metab_seasons %>% 
   group_by(corrected_Year, Season) %>% 
@@ -653,48 +613,8 @@ season_grouping <- metab_seasons %>%
             NEP_CV = round(sd(NEM_QAQC, na.rm = T) / mean(NEM_QAQC, na.rm = T), 2)
             ) 
 
+#Table S3
 season_grouping
-
-#make figure that just groups all data into seasons for sup fig X
-# gpp_acrossseasons_kruskal <- metab_seasons %>% 
-#   ggplot(aes(x = as.factor(Season), y = GPP_QAQC))+ 
-#   geom_boxplot(alpha = 0.5)+
-#   geom_jitter(position=position_jitter(0.1))+
-#   labs(x = element_blank(),  y = gpp_label)+
-#   ylim(0,17)+
-#   stat_compare_means(method = "kruskal.test", 
-#                      label.y = 15, label.x = 1.3, size = 6 )+ # , aes(label = paste0("p = ", after_stat(p.format)))
-#   theme_bw(base_size = 14)+
-#   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), axis.line = element_line(color="black"), axis.title.x = element_text(size=16), axis.title.y = element_text(size=16),
-#         legend.title = element_text(size=16),  plot.title = element_text(size=20),  axis.text = element_text(size=16,color="black"),  legend.text = element_text(size=16,color="black"))
-# 
-# r_acrossseasons_kruskal <- metab_seasons %>% 
-#   ggplot(aes(x = as.factor(Season), y = R_QAQC))+ 
-#   geom_boxplot(alpha = 0.5)+
-#   geom_jitter(position=position_jitter(0.1))+
-#   labs(x = element_blank(),  y = r_label)+
-#   ylim(0,17)+
-#   stat_compare_means(method = "kruskal.test", 
-#                      label.y = 15, label.x = 1.3, size = 6 )+ # , aes(label = paste0("p = ", after_stat(p.format)))
-#   theme_bw(base_size = 14)+
-#   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), axis.line = element_line(color="black"), axis.title.x = element_text(size=16), axis.title.y = element_text(size=16),
-#         legend.title = element_text(size=16),  plot.title = element_text(size=20),  axis.text = element_text(size=16,color="black"),  legend.text = element_text(size=16,color="black"))
-# 
-# nep_acrossseasons_kruskal <- metab_seasons %>% 
-#   ggplot(aes(x = as.factor(Season), y = NEM_QAQC))+ 
-#   geom_boxplot(alpha = 0.5)+
-#   geom_jitter(position=position_jitter(0.1))+
-#   labs(x = element_blank(),  y = nep_label)+
-#   stat_compare_means(method = "kruskal.test", 
-#                      label.y = -10, label.x = 1.3, size = 6 )+ # , aes(label = paste0("p = ", after_stat(p.format)))
-#   theme_bw(base_size = 14)+
-#   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), axis.line = element_line(color="black"), axis.title.x = element_text(size=16), axis.title.y = element_text(size=16),
-#         legend.title = element_text(size=16),  plot.title = element_text(size=20),  axis.text = element_text(size=16,color="black"),  legend.text = element_text(size=16,color="black"))
-# 
-# SupFig_SX_acrossseasons <- gpp_acrossseasons_kruskal / r_acrossseasons_kruskal / nep_acrossseasons_kruskal
-# 
-# ggsave(filename = "../../Figures/SupFig_SX_metab_acrossseasons.jpg",
-#        SupFig_SX_acrossseasons, device = "jpg", width = 350, height = 200, units = "mm")
 
 
 ```
@@ -706,7 +626,6 @@ season_grouping
 ##Interannual 
 
 inter_var <- metab_seasons_long %>% 
-  rename(corrected_Year = cor_Year) %>% 
   group_by(name, corrected_Year) %>% 
     filter(corrected_Year %in% c(2016, 2018, 2019, 2020, 2021) ) %>% 
   summarise(median = median(value, na.rm=T))%>% 
@@ -759,13 +678,11 @@ metab2022 <- metab_seasons %>%
   geom_vline(xintercept = ymd("2022-02-09"))+ 
   geom_rect(data= rect1, aes(xmin=as.Date("2022-01-11"), xmax=as.Date("2022-01-13"), ymin= -Inf, ymax=Inf), fill="#FAF9F6", alpha=1, inherit.aes = FALSE) +
   geom_rect(data= rect2, aes(xmin= as.Date("2022-01-16"), xmax= as.Date("2022-02-09"), ymin= -Inf, ymax=Inf), fill="#FAF9F6", alpha=1, inherit.aes = FALSE) +
-  # labs(y=metab_label, x=NULL)+ 
   labs(y=NULL, x=NULL)+
   geom_hline(yintercept = 0, linetype=2, size = 1.5) +
   geom_point(shape = 21, color="black", fill ="seagreen3",size=4)+ # green 3,  lightgreen, seagreen3, springgreen3
   geom_point(aes(x=Date,y=(R_QAQC*-1)),shape = 21, color = "black", fill ="brown",size=4)+ #gray30 for darker outline
-  #geom_point(aes(x=Date,y=NEM_QAQC),shape = 21, color = "black", fill ="pink",size=4)+
-  #geom_smooth(aes(x=Date, y=NEM_QAQC))+
+
   geom_line(aes(x = Date, y = NEP_7day_rollmean), size = 2, color = "black", alpha = 0.8)+ #7 day rolling mean
   scale_x_date(breaks = seq(min(ymd("2021-12-20")), max(ymd("2022-02-22")), by = "21 days") , date_labels = "%d %b")+
  theme_bw(base_size = 22)+
@@ -785,7 +702,6 @@ metab2021 <- metab_seasons %>%
   filter(Date <= ymd("2021-02-22"),
          Date >= ymd("2020-12-20")) %>% 
   ggplot()+
-  # scale_y_continuous(limits=c(-5.5,3), breaks=seq(-7,5, by=1))+
   ylim(-3,2)+
   geom_vline(xintercept = ymd("2020-12-27"))+   
   geom_vline(xintercept = ymd("2020-12-29"))+
@@ -796,13 +712,10 @@ metab2021 <- metab_seasons %>%
   geom_rect(data= rect1, aes(xmin=as.Date("2020-12-27"), xmax=as.Date("2020-12-29"), ymin=-Inf, ymax=Inf), fill="#FAF9F6", alpha=1, inherit.aes = FALSE) +
   geom_rect(data= rect2, aes(xmin= as.Date("2021-01-10 00:00:00"), xmax= as.Date("2021-02-08 00:00:00"), ymin=-Inf, ymax=Inf), fill="#FAF9F6", alpha=1, inherit.aes = FALSE) +
   geom_rect(data= rect3, aes(xmin= as.Date("2021-02-11 00:00:00"), xmax= as.Date("2021-02-22 00:00:00"), ymin=-Inf, ymax=Inf), fill="#FAF9F6", alpha=1, inherit.aes = FALSE) +
-  # labs(y=metab_label, x=NULL)+ 
   labs(y=NULL, x=NULL)+   
   geom_hline(yintercept = 0, linetype=2, size = 1.5) +
   geom_point(aes(x = Date, y = GPP_QAQC), shape = 21, color="black", fill ="seagreen3",size=4)+
   geom_point(aes(x=Date,y=(R_QAQC*-1)),shape = 21, color = "black", fill ="brown",size=4)+
-  #geom_point(aes(x=Date,y=NEM_QAQC),shape = 21, color = "black", fill ="pink",size=4)+
-  #geom_smooth(aes(x=Date, y=NEM_QAQC))+
   geom_line(aes(x = Date, y = NEP_7day_rollmean), size = 2, color = "black", alpha = 0.8)+ #7 day rolling mean
   scale_x_date(breaks = seq(min(ymd("2020-12-20")), max(ymd("2021-02-22")), by = "21 days") , date_labels = "%d %b")+
  theme_bw(base_size = 22)+
@@ -822,15 +735,11 @@ metab2020 <- metab_seasons %>%
   filter(Date <= ymd("2020-02-22"),
          Date >= ymd("2019-12-20")) %>% 
   ggplot(aes(x = Date, y = GPP_QAQC))+
-  # scale_y_continuous(limits=c(-7,2), breaks=seq(-7,5, by=1))+
   ylim(-3,2)+
-  #labs(y=metab_label, x=NULL)+
   labs(y=metab_label2, x=NULL)+
   geom_hline(yintercept = 0, linetype=2, size = 1.5) +
   geom_point(shape = 21, color="black", fill ="seagreen3",size=4)+ 
   geom_point(aes(x=Date,y=(R_QAQC*-1)),shape = 21, color = "black", fill ="brown",size=4)+
-  #geom_point(aes(x=Date,y=NEM_QAQC),shape = 21, color = "black", fill ="pink",size=4)+
-  #geom_smooth(aes(x=Date, y=NEM_QAQC))+
   geom_line(aes(x = Date, y = NEP_7day_rollmean), size = 2, color = "black", alpha = 0.8)+ #7 day rolling mean
   scale_x_date(breaks = seq(min(ymd("2019-12-20")), max(ymd("2020-02-22")), by = "21 days") , date_labels = "%d %b")+
  theme_bw(base_size = 22)+
@@ -851,7 +760,6 @@ metab2019 <- metab_seasons %>%
   filter(Date <= ymd("2019-02-22"),
          Date >= ymd("2018-12-20")) %>% 
   ggplot(aes(x = Date, y = GPP_QAQC))+
-  #labs(y=metab_label, x=NULL)+
   labs(y=NULL, x=NULL)+
   ylim(-3,2)+
   geom_vline(xintercept = as.Date("2019-01-21"))+   #ice on 1/21/19 and off 1/24/2019
@@ -863,8 +771,6 @@ metab2019 <- metab_seasons %>%
   geom_hline(yintercept = 0, linetype=2, size = 1.5) +
   geom_point(shape = 21, color="black", fill ="seagreen3",size=4)+ 
   geom_point(aes(x=Date,y=(R_QAQC*-1)),shape = 21, color = "black", fill ="brown",size=4)+
-  #geom_point(aes(x=Date,y=NEM_QAQC),shape = 21, color = "black", fill ="pink",size=4)+
-  #geom_smooth(aes(x=Date, y=NEM_QAQC))+
   geom_line(aes(x = Date, y = NEP_7day_rollmean), size = 2, color = "black", alpha = 0.8)+ #7 day rolling mean
   scale_x_date(breaks = seq(min(ymd("2018-12-20")), max(ymd("2019-02-22")), by = "21 days") , date_labels = "%d %b")+
  theme_bw(base_size = 22)+
@@ -884,7 +790,6 @@ metab2018 <- metab_seasons %>%
   filter(Date <= ymd("2018-02-22"),
          Date >= ymd("2017-12-20")) %>% 
   ggplot(aes(x = Date, y = GPP_QAQC))+
-  # labs(y=metab_label, x=NULL)+ 
   ylim(-3,2)+
   geom_vline(xintercept = as.Date("2017-12-28"))+   
   geom_vline(xintercept = as.Date("2018-01-08"))+
@@ -893,8 +798,6 @@ metab2018 <- metab_seasons %>%
   geom_hline(yintercept = 0, linetype=2, size = 1.5) +
   geom_point(shape = 21, color="black", fill ="seagreen3",size=4)+ 
   geom_point(aes(x=Date,y=(R_QAQC*-1)),shape = 21, color = "black", fill ="brown",size=4)+
-  #geom_point(aes(x=Date,y=NEM_QAQC),shape = 22, color = "black", fill ="pink",size=4)+
-  #geom_smooth(aes(x=Date, y=NEM_QAQC))+
   geom_line(aes(x = Date, y = NEP_7day_rollmean), size = 2, color = "black", alpha = 0.8)+ #7 day rolling mean
   scale_x_date(breaks = seq(min(ymd("2017-12-20")), max(ymd("2018-02-22")), by = "21 days") , date_labels = "%d %b")+
   theme_bw(base_size = 22)+
@@ -914,7 +817,6 @@ metab2016 <- metab_seasons %>%
   filter(Date <= ymd("2016-02-22"),
          Date >= ymd("2015-12-20")) %>% 
   ggplot(aes(x = Date, y = GPP_QAQC))+
-  # labs(y=metab_label, x=NULL)+ 
   labs(y=NULL, x=NULL)+ 
   ylim(-3,2)+
   geom_vline(xintercept = as.Date("2016-01-21"))+
@@ -923,8 +825,6 @@ metab2016 <- metab_seasons %>%
   geom_hline(yintercept = 0, linetype=2, size = 1.5) +
   geom_point(shape = 21, color="black", fill ="seagreen3",size=4)+ 
   geom_point(aes(x=Date,y=(R_QAQC*-1)),shape = 21, color = "black", fill ="brown",size=4)+
-  #geom_point(aes(x=Date,y=NEM_QAQC),shape = 21, color = "black", fill ="pink",size=4)+
-  #geom_smooth(aes(x=Date, y=NEM_QAQC))+
   geom_line(aes(x = Date, y = NEP_7day_rollmean), size = 2, color = "black", alpha = 0.8)+ #7 day rolling mean
   scale_x_date(breaks = seq(min(ymd("2015-12-20")), max(ymd("2016-02-22")), by = "21 days") , date_labels = "%d %b")+
   theme_bw(base_size = 22)+
@@ -934,8 +834,7 @@ metab2016 <- metab_seasons %>%
         plot.background = element_blank(),
         panel.background = element_rect(fill = "skyblue2"),
         panel.grid.major = element_blank(),
-        #axis.title.y = element_text(hjust = -0.00000000000001),
-                panel.grid.minor = element_blank()
+        panel.grid.minor = element_blank()
         ) +
   ggtitle("2016 Winter")
 
@@ -947,7 +846,7 @@ metab2016
 
 fig3 <- (metab2016 + metab2018 + metab2019) / (metab2020 + metab2021 + metab2022)
 
-ggsave(filename = "../../Figures/Fig3_Fin.jpg",
+ggsave(filename = "../../Figures/Fig3.jpg",
        fig3, device = "jpg", width = 350, height = 200, units = "mm")
 
 
@@ -955,33 +854,16 @@ ggsave(filename = "../../Figures/Fig3_Fin.jpg",
 ```
 
 
-## Ice cover plot 
-Fig 1 part B
+## Fig 1b; Ice cover plot 
 
 ```{r}
 ice <- read.csv("../../Data/EDI2023/Ice_Data_2013_2022.csv")
 ice$Date <- as.Date(ice$Date)
 
-icetotaldays <- data.frame(Year = c(2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022), #removing 2014 that had 35 days
-                           Days_iceCover = c(49, 32, 3, 12, 9, 0, 35, 28))
+icetotaldays <- data.frame(Year = c(2016, 2017, 2018, 2019, 2020, 2021, 2022), 
+                           Days_iceCover = c(32, 3, 12, 9, 0, 35, 28))
 icetotaldays$Year <- as.character(icetotaldays$Year)
 
-plot(icetotaldays$Year, icetotaldays$Days_iceCover)
-
-##ice dotted lines plot 
-#2014
-ice2014 <- data.frame(Date = seq(as.Date("2013-12-01"), as.Date("2014-03-31"), by="day"))
-ice2014dates <- c(seq(as.Date("2014-01-06"), as.Date("2014-01-14"), by="day"), seq(as.Date("2014-01-28"), as.Date("2014-02-22"), by="day"))
-ice2014$icevector <- ifelse(ice2014$Date %in% ice2014dates, 1, 0)
-ice2014$julianDOY <- format(ice2014$Date, "%j")
-ice2014$Days_since_1Dec <- c(0:(nrow(ice2014)-1))
-
-#2015
-ice2015 <- data.frame(Date = seq(as.Date("2014-12-01"), as.Date("2015-03-31"), by="day"))
-ice2015dates <- c(seq(as.Date("2015-01-08"), as.Date("2015-01-29"), by="day"), seq(as.Date("2015-02-14"), as.Date("2015-03-12"), by="day"))
-ice2015$icevector <- ifelse(ice2015$Date %in% ice2015dates, 1, 0)
-ice2015$julianDOY <- format(ice2015$Date, "%j")
-ice2015$Days_since_1Dec <- c(0:(nrow(ice2015)-1))
 
 #2016
 ice2016 <- data.frame(Date = seq(as.Date("2015-12-01"), as.Date("2016-03-31"), by="day"))
@@ -1037,14 +919,12 @@ ice2022$julianDOY <- format(ice2022$Date, "%j")
 ice2022$Days_since_1Dec <- c(0:(nrow(ice2022)-1))
 
 #making the plot
-binded_icedata <- rbind(ice2014, ice2015, ice2016, ice2017, ice2018, ice2019, ice2020, ice2021, ice2022)
+binded_icedata <- rbind(ice2016, ice2017, ice2018, ice2019, ice2020, ice2021, ice2022)
 
 binded_icedata <- binded_icedata %>% 
   mutate(Year = as.numeric(format(as.Date(Date), "%Y")),
          Month = as.numeric(format(as.Date(Date), "%m"))) %>% 
-  mutate(corrected_years = ifelse(Year == 2013 & Month == 12, 2014, Year),
-         corrected_years = ifelse(Year == 2014 & Month == 12, 2015, corrected_years),
-         corrected_years = ifelse(Year == 2015 & Month == 12, 2016, corrected_years),
+  mutate(corrected_years = ifelse(Year == 2015 & Month == 12, 2016, Year),
          corrected_years = ifelse(Year == 2016 & Month == 12, 2017, corrected_years),
          corrected_years = ifelse(Year == 2017 & Month == 12, 2018, corrected_years),
          corrected_years = ifelse(Year == 2018 & Month == 12, 2019, corrected_years),
@@ -1055,7 +935,7 @@ binded_icedata <- binded_icedata %>%
 
 binded_icedata_remove_zeros <- binded_icedata %>% 
   filter(Month %in% c(1,2,3,12)) %>% 
-  mutate(icevector_yn = ifelse(icevector == 1, "On", "Off"))  #filter(icevector == 1)
+  mutate(icevector_yn = ifelse(icevector == 1, "On", "Off"))
 
 
 icecover_dotplots_B <-  binded_icedata_remove_zeros %>% 
@@ -1065,11 +945,10 @@ icecover_dotplots_B <-  binded_icedata_remove_zeros %>%
                 fakeYear = ifelse(Month == 12, 2023, 2024), 
                 fakeDate = paste(fakeYear, Month, Day, sep = "-"),
                 fakeDate = as.Date(fakeDate)) %>% 
-  filter(corrected_years >= 2016) %>%
   filter(fakeDate >= ymd("2023-12-20"),
          fakeDate <= ymd("2024-02-22")) %>% 
   ggplot(mapping = aes(x = fakeDate, y = corrected_years))+
-  geom_tile(aes(fill = as.character(icevector_yn_A)))+ #, alpha = 0.2
+  geom_tile(aes(fill = factor(icevector_yn_A, levels = c("No Ice Cover", "Ice Cover"))))+ #, alpha = 0.2
   scale_x_date(breaks = seq(min(ymd("2023-12-20")), max(ymd("2024-02-22")), by = "28 days") , date_labels = "%d %b", expand = c(0,0))+
   scale_y_discrete(expand=c(0,0))+ #remove space on either end of y axis
   labs(fill = element_blank(),
@@ -1082,7 +961,6 @@ icecover_dotplots_B <-  binded_icedata_remove_zeros %>%
   geom_hline(yintercept=2.5, linewidth = 1)+
   geom_hline(yintercept=1.5, linewidth = 1)+
   geom_hline(yintercept=0.5, linewidth = 1)+
-  #theme_bw()+  
   theme(legend.position="top",
         legend.background =  element_rect(color = "black", linetype = "solid", fill = "gray83"))+
   theme(panel.border=element_blank(),
@@ -1095,24 +973,21 @@ icecover_dotplots_B <-  binded_icedata_remove_zeros %>%
         legend.title = element_text(size=32),
         axis.text = element_text(size=32,color="black"),
         legend.text = element_text(size=32,color="black"))+ #these size were 18 before 
-  #scale_fill_manual(values=c("#30D5C8", "#D3D3D3"))
-   scale_fill_manual(values=c("#FAF9F6", "skyblue2"))
+   scale_fill_manual(values=c( "skyblue2", "#FAF9F6"))
 
 
 icecover_dotplots_B
 
- # ggsave(filename = "../../Figures/Fig1b_icecover.jpg",
- #        icecover_dotplots_B, device = "jpg", width = 10.6, height = 20, units = "in")
+ ggsave(filename = "../../Figures/Fig1b_icecover.jpg",
+        icecover_dotplots_B, device = "jpg", width = 10.6, height = 20, units = "in")
 
 ```
 
 
-## Winter NEP boxplots 
+## Fig 4a,b, Fig S6; Winter NEP boxplots 
 
 ```{r}
 #filter down to winter data
-head(metab_seasons)
-
 winterNEP <- metab_seasons %>% 
   filter(Date >= "2015-12-01",
          Date <= "2022-02-28") %>%  #removing times from incomplete winters 
@@ -1120,7 +995,9 @@ winterNEP <- metab_seasons %>%
   filter(corrected_Year != "2017")
 
 
-### facet by year 
+### Fig S6 facet by year 
+
+#NEP; also fig 4a
 wintercomp_byyear_NEP <- winterNEP %>% 
   mutate(Ice_on_off = ifelse(icevector == 1, "Ice", "No Ice")) %>% 
   ggplot(aes(x = as.factor(Ice_on_off), y = NEM_QAQC, fill = Ice_on_off))+ # , fill = Ice_on_off
@@ -1139,8 +1016,7 @@ wintercomp_byyear_NEP <- winterNEP %>%
   guides(fill = FALSE) + #remove ice on off from legend since its already on x axis
   scale_fill_manual(values = c( "#FAF9F6", "skyblue2"))
 
-#wintercomp_byyear_NEP
-
+#GPP
 wintercomp_byyear_GPP <- winterNEP %>% 
   mutate(Ice_on_off = ifelse(icevector == 1, "Ice", "No Ice")) %>% 
   ggplot(aes(x = as.factor(Ice_on_off), y = GPP_QAQC, fill = Ice_on_off))+ # , fill = Ice_on_off
@@ -1156,8 +1032,7 @@ wintercomp_byyear_GPP <- winterNEP %>%
         panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
   scale_fill_manual(values = c( "#FAF9F6", "skyblue2"))
 
-#wintercomp_byyear_GPP
-
+#R
 wintercomp_byyear_R <- winterNEP %>% 
   mutate(Ice_on_off = ifelse(icevector == 1, "Ice", "No Ice")) %>% 
   ggplot(aes(x = as.factor(Ice_on_off), y = R_QAQC, fill = Ice_on_off))+ # , fill = Ice_on_off
@@ -1173,14 +1048,13 @@ wintercomp_byyear_R <- winterNEP %>%
         panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
   scale_fill_manual(values = c( "#FAF9F6", "skyblue2"))
 
-#wintercomp_byyear_R
 
 wintercomps_byyears <- wintercomp_byyear_NEP / wintercomp_byyear_R / wintercomp_byyear_GPP
 
-# ggsave(filename = "../../Figures/FigS6_WinterComp_byyears.jpg",
-#         wintercomps_byyears, device = "jpg", width = 350, height = 200, units = "mm")
+ggsave(filename = "../../Figures/Fig_S6_WinterComp_byyears.jpg",
+        wintercomps_byyears, device = "jpg", width = 350, height = 200, units = "mm")
 
-### Winter NEP average to year 
+### Fig 4b Winter NEP average to year 
 wintercomp_acrossyears <- winterNEP %>% 
   group_by(corrected_Year, icevector) %>% 
   summarise(NEP = mean(NEM_QAQC, na.rm = T)) %>% 
@@ -1189,9 +1063,7 @@ wintercomp_acrossyears <- winterNEP %>%
   geom_boxplot(position = position_dodge(preserve = "single"), alpha = 1, outlier.alpha = 0.5)+   #, outlier.alpha = 0
   geom_jitter(aes(shape = as.character(corrected_Year)) , position=position_jitter(0.1), size = 4, fill = "white")+
   scale_shape_manual(values = c(0,1,2,5,6,7)) +
-  # stat_summary(fun = mean, geom="point", shape=22, size=5, color="black", fill="black") + #point mean
   geom_hline(yintercept = 0, linetype=2, size = 0.75) +
-  #stat_compare_means(method = "wilcox.test", label.y = 0.4, label.x = 1, size = 6,  aes(label = ..p.format..))+
   stat_compare_means(method = "wilcox.test", label.y = -1.5, label.x = 1, size = 6, aes(label = sprintf("Wilcoxon, p = %5.2f", as.numeric(..p.format..))))+ #round to 2 digits
   ylim(-1.5, 0.5)+
   labs(fill = element_blank(),
@@ -1206,19 +1078,11 @@ wintercomp_acrossyears <- winterNEP %>%
   
 wintercomp_acrossyears
   
-b <- winterNEP %>% 
-  group_by(corrected_Year, icevector) %>% 
-  summarise(NEP = mean(NEM_QAQC, na.rm = T),
-            GPP = mean(GPP_QAQC, na.rm = T),
-             R = mean(R_QAQC, na.rm = T)) #%>% 
-  # filter(corrected_Year %in% c(2016,2019,2021,2022))
-
-wilcox.test(NEP ~ icevector, data = b) 
 
 ```
 
 
-## Seasons boxplots 
+## 4c,d,e; Seasons boxplots 
 
 ```{r}
 ## set up data and levels for plotting 
@@ -1230,72 +1094,6 @@ boxdata <- metab_seasons %>%
   mutate(corrected_Year = as.character(corrected_Year)) %>% 
   filter(corrected_Year %in% c("2016", "2018", "2019", "2020", "2021"))
 
-#### make plots per year for supp figure 
-
-seasonscomp_byyear_NEP <- boxdata %>% 
-  filter(!is.na(NEM_QAQC)) %>% #removing NAs from data frame for plot to see what gets cut off by y limits 
-  # filter(Season %in% c("Winter", "Summer")) %>% #If you want plot comparing just winter and summer
-  ggplot(mapping = aes(y = NEM_QAQC, x = factor(Season, level = level_order)))+  # , fill = Season
-  #geom_violin()+
-  geom_boxplot(aes(fill = Season), position = position_dodge(0.9), alpha = 0.9)+
- geom_jitter(position=position_jitter(0.1), alpha = 0.3)+
-  facet_wrap(~corrected_Year, nrow = 1)+
-  # ylim(-3,3)+
-  #scale_y_continuous(limits=c(-9, 4), breaks=seq(-15,5, by=3))+
-  geom_hline(yintercept = 0, linetype=2, size = 0.75) +
- # stat_summary(fun=mean, geom="point", shape=4, size=3, color="black", position = position_dodge2(width = 0.9, preserve = "single"))+ #add the mean 
-  stat_compare_means(method = "kruskal.test", aes(label = paste0("p = ", after_stat(p.format))), 
-                     label.y = -10.1, label.x = 2, size = 6 ) +  # , aes(label = ..p.signif..)
-  labs(x = NULL, y = nep_label)+
-  theme_bw(base_size = 18)+
-    scale_x_discrete(guide = guide_axis(n.dodge = 2)) +
-  theme(legend.position = "top",
-        axis.title.y = element_text(size=14),
-        panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
- scale_fill_manual(values = c( "darkorange3", "darkturquoise", "green4", "slategray"))
-
-
-GPPseasonscomp_byyear <- boxdata %>% 
-  filter(!is.na(NEM_QAQC)) %>% #removing NAs from data frame for plot to see what gets cut off by y limits 
-  ggplot(mapping = aes(y = GPP_QAQC, x = factor(Season, level = level_order)))+  # , fill = Season
-  geom_boxplot(aes(fill = Season), position = position_dodge(0.9), alpha = 0.9)+
- geom_jitter(position=position_jitter(0.1), alpha = 0.3)+
-  facet_wrap(~corrected_Year, nrow = 1)+
-  stat_compare_means(method = "kruskal.test", aes(label = paste0("p = ", after_stat(p.format))), 
-                     label.y = 8, label.x = 2, size = 6 ) +  # , aes(label = ..p.signif..)
-  labs(x = NULL, y = gpp_label)+
-  theme_bw(base_size = 18)+
-    scale_x_discrete(guide = guide_axis(n.dodge = 2)) +
-  theme(legend.position = "none",
-        axis.title.y = element_text(size=14),
-        panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
- scale_fill_manual(values = c( "darkorange3", "darkturquoise", "green4", "slategray"))
-
-Rseasonscomp_byyear <- boxdata %>% 
-  filter(!is.na(NEM_QAQC)) %>% #removing NAs from data frame for plot to see what gets cut off by y limits 
-  ggplot(mapping = aes(y = R_QAQC, x = factor(Season, level = level_order)))+  # , fill = Season
-  geom_boxplot(aes(fill = Season), position = position_dodge(0.9), alpha = 0.9)+
- geom_jitter(position=position_jitter(0.1), alpha = 0.3)+
-  facet_wrap(~corrected_Year, nrow = 1)+
-  stat_compare_means(method = "kruskal.test", aes(label = paste0("p = ", after_stat(p.format))), 
-                     label.y = 12, label.x = 2, size = 6 ) +  # , aes(label = ..p.signif..)
-  labs(x = NULL, y = r_label)+
-  theme_bw(base_size = 18)+
-    scale_x_discrete(guide = guide_axis(n.dodge = 2)) +
-  theme(legend.position = "none",
-        axis.title.y = element_text(size=14),
-        panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
- scale_fill_manual(values = c( "darkorange3", "darkturquoise", "green4", "slategray"))
-
-seasonscomp_byyear_SuppFig <- seasonscomp_byyear_NEP / GPPseasonscomp_byyear / Rseasonscomp_byyear
-
-# ggsave(filename = "../../Figures/SupFigX_SeasonsComp_byyear.jpg",
-#        seasonscomp_byyear_SuppFig, device = "jpg", width = 350, height = 200, units = "mm")
-
-
-
-####  Making seasonal comps across years for GPP, R, and NEP - Fig 4 c,d,e
-
 boxdata_grouped <-  boxdata %>% 
   group_by(corrected_Year, Season) %>% 
   summarise(R = mean(R_QAQC, na.rm = T),
@@ -1303,7 +1101,6 @@ boxdata_grouped <-  boxdata %>%
             NEP = mean(NEM_QAQC, na.rm = T))
 
 # Seasonal R across years 
-
 kruskalR_seasons <- kruskal.test(R ~ Season, data = boxdata_grouped)
 kruskalR_seasons
 dunnR_seasons <- FSA::dunnTest(R ~ Season, data = boxdata_grouped)
@@ -1316,8 +1113,6 @@ left_join(boxdata_grouped, dunnR_seasons_letters_list, by = c("Season" = "Group"
   geom_boxplot(aes(fill = Season), position = position_dodge(preserve = "single"), alpha = 0.5, outlier.alpha = 0.5)+ #, outlier.alpha = 0
   geom_jitter(aes(shape = as.character(corrected_Year)) , position=position_jitter(0.3), size = 3, fill = "black")+
   scale_shape_manual(values = c(0,1,2,5,6,7)) +
-  # stat_summary(fun = mean, geom="point", shape=22, size=5, color="black", fill="black") + #point mean
-  #stat_compare_means(method = "kruskal.test", label.y = 2.9, label.x = 1.3, size = 6)+
     stat_compare_means(method = "kruskal.test", label.y = -0.2, label.x = 1.3, size = 6, aes(label = sprintf("Kruskal-Wallis, p = %5.2f", as.numeric(..p.format..))))+ #round to 2 digits
   geom_text(aes(x = Season, label = Letter), y = 2.85, size = 6)+
   ylim(-0.2,3)+
@@ -1333,7 +1128,6 @@ left_join(boxdata_grouped, dunnR_seasons_letters_list, by = c("Season" = "Group"
 
 
 # Seasonal GPP across years 
-
 kruskalGPP_seasons <- kruskal.test(GPP ~ Season, data = boxdata_grouped)
 kruskalGPP_seasons
 dunnGPP_seasons <- FSA::dunnTest(GPP ~ Season, data = boxdata_grouped)
@@ -1346,8 +1140,6 @@ GPPseasonscomp_acrossyears <-
   geom_boxplot(aes(fill = Season), position = position_dodge(preserve = "single"), alpha = 0.5, outlier.alpha = 0.5)+ #, outlier.alpha = 0
   geom_jitter(aes(shape = as.character(corrected_Year)) , position=position_jitter(0.3), size = 3, fill = "black")+
   scale_shape_manual(values = c(0,1,2,5,6,7)) +
-  # stat_summary(fun = mean, geom="point", shape=22, size=5, color="black", fill="black") + #point mean
-  #stat_compare_means(method = "kruskal.test", label.y = 2.9, label.x = 1.3, size = 6)+
       stat_compare_means(method = "kruskal.test", label.y = -0.2, label.x = 1.3, size = 6, aes(label = sprintf("Kruskal-Wallis, p = %5.2f", as.numeric(..p.format..))))+ #round to 2 digits
   geom_text(aes(x = Season, label = Letter), y = 2.85, size = 6)+
   ylim(-0.2,3)+
@@ -1363,7 +1155,6 @@ GPPseasonscomp_acrossyears <-
 
 
 # Seasonal NEP across years 
-
 kruskalNEP_seasons <- kruskal.test(NEP ~ Season, data = boxdata_grouped)
 kruskalNEP_seasons
 
@@ -1373,8 +1164,6 @@ NEPseasonscomp_acrossyears <- boxdata_grouped %>%
   geom_jitter(aes(shape = as.character(corrected_Year)) , position=position_jitter(0.3), size = 3, fill = "black")+
   scale_shape_manual(values = c(0,1,2,5,6,7)) +
   geom_hline(yintercept = 0, linetype=2, size = 0.75) +
-  # stat_summary(fun = mean, geom="point", shape=22, size=5, color="black", fill="black") + #point mean
-  #stat_compare_means(method = "kruskal.test", label.y = 0.45, label.x = 1.3, size = 6)+
       stat_compare_means(method = "kruskal.test", label.y = -1.7, label.x = 1.3, size = 6, aes(label = sprintf("Kruskal-Wallis, p = %5.2f", as.numeric(..p.format..))))+ #round to 2 digits
   ylim(-1.7, 0.5)+
   labs(fill = element_blank(),
@@ -1391,7 +1180,6 @@ NEPseasonscomp_acrossyears <- boxdata_grouped %>%
 #combine plots
 NEPseasonscomp_acrossyears + GPPseasonscomp_acrossyears + Rseasonscomp_acrossyears
 
-
 ```
 
 
@@ -1406,7 +1194,7 @@ fig4bot<- Rseasonscomp_acrossyears + GPPseasonscomp_acrossyears + NEPseasonscomp
 
 fig4 <- fig4top / fig4bot + plot_annotation(tag_levels = 'a')
 
-ggsave(filename = "../../Figures/Fig4_test.jpg",
+ggsave(filename = "../../Figures/Fig4.jpg",
        fig4, device = "jpg", width = 350, height = 200, units = "mm")
 
 
@@ -1414,14 +1202,13 @@ ggsave(filename = "../../Figures/Fig4_test.jpg",
 
 
 
-## 9m DO under ice and temp profiles 
+## Fig S7; 9m DO under ice and temp profiles 
 
 ```{r}
-
+#read in data
 edi_catwalk <- read_csv("../../Data/EDI2023/FCR_Catwalk_2018_2022.csv")
 
-
-#### DO 
+## set up data
 do_underice <- edi_catwalk %>% 
   mutate(Date = as.Date(DateTime),
          Month = month(Date)) %>% 
@@ -1431,18 +1218,12 @@ do_underice <- edi_catwalk %>%
             DO_5m = mean(RDO_mgL_5_adjusted, na.rm = T),
             DO_1.6m = mean(EXODO_mgL_1, na.rm = T)) %>% 
   pivot_longer(-1)
-  
-# do_underice %>% 
-#   filter(Date < ymd("2022-02-22")) %>% 
-#   ggplot(aes(x = Date, y = value, color = name))+
-#   geom_point()+
-#   ylim(0,15)
-# 
-# summary(do_underice)
+
 
 seasons_do_underice <- left_join(seasons_ts_operational, do_underice, by = "Date") %>% 
   filter(Season == "Winter")
 
+##plot and save
 DOprofile_underice <- seasons_do_underice %>% 
   filter(Date > ymd("2018-12-01")) %>% 
   mutate(Month = month(Date),
@@ -1458,37 +1239,9 @@ DOprofile_underice <- seasons_do_underice %>%
 
 DOprofile_underice
 
-ggsave(filename = "../../Figures/FigS7_DOunderIce.jpg",
+ggsave(filename = "../../Figures/Fig_S7_DOunderIce.jpg",
        DOprofile_underice, device = "jpg", width = 200, height = 250, units = "mm")
   
-#### Temp 
-temp_underice <- edi_catwalk %>% 
-  select(DateTime:ThermistorTemp_C_9 ) %>% 
-  mutate(Date = as.Date(DateTime)) %>% 
-  group_by(Date) %>% 
-  summarise(across(.cols = where(is.numeric), .fns = ~mean(.x, na.rm = TRUE)), .groups = "drop") %>% 
-  pivot_longer(-1)
-
-seasons_temp_underice <- left_join(seasons_ts_operational, temp_underice, by = "Date") %>% 
-  filter(Season == "Winter")
-
-# seasons_temp_underice %>% 
-#   filter(Date > ymd("2018-12-01")) %>% 
-#   mutate(name = ifelse(name == "ThermistorTemp_C_surface", "ThermistorTemp_C_0.1", name),
-#          name_A = as.numeric(gsub("ThermistorTemp_C_", '', name))) %>% 
-#   mutate(Month = month(Date),
-#          Day = day(Date),
-#          FakeYear = ifelse(Month == 12, 2023, 2024), 
-#          FakeDate = ymd(paste(FakeYear, Month, Day, sep = "-"))) %>% 
-#   ggplot(aes(x = FakeDate, y = value, color = as.character(name_A)))+
-#   geom_point()+
-#   labs(x = element_blank(),  y = "Temp (C)", color = "Depth")+
-#   facet_wrap(~cor_Year)+
-#   theme_bw()+
-#   ylim(2,4.5)
-
-
-
 
 ```
 
