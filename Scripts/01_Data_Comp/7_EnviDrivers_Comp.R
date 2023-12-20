@@ -55,8 +55,6 @@ airtemp <- nldas_met_daily_offset %>%
   ggplot(aes(x = daily_airtemp_nldas , y = daily_airtemp))+
   geom_point()+
   ggtitle("AirTemp FCR met ~ NLDAS")+
-  # ylim(0,1000)+
-  # xlim(0,1000)+
   labs(x = "NLDAS Air Temp", y = "FCR met station AirTemp")+
   stat_poly_line(method = "lm", linewidth = 2)+
   # geom_smooth(aes(x = NLDAS, y = FCRmet), method = "lm", inherit.aes = F)+
@@ -74,8 +72,6 @@ rain <- nldas_met_daily_offset %>%
   ggplot(aes(x = daily_rain_mm_nldas , y = daily_rain_mm))+
   geom_point()+
   ggtitle("Rain FCR met ~ NLDAS")+
-  # ylim(0,1000)+
-  # xlim(0,1000)+
   labs(x = "NLDAS Rain", y = "FCR met station Rain")+
   stat_poly_line(method = "lm", linewidth = 2)+
   # geom_smooth(aes(x = NLDAS, y = FCRmet), method = "lm", inherit.aes = F)+
@@ -138,8 +134,6 @@ inf_wrt <- inf_daily %>%
 plot(inf_wrt$Date, inf_wrt$Fin_WRT_days)
 summary(inf_wrt$Fin_WRT_days)
 sd(inf_wrt$Fin_WRT_days, na.rm = T)
-hist(inf_wrt$Fin_WRT_days, na.rm = T)
-
 
 
 #### Chemsitry #### 
@@ -328,15 +322,6 @@ E24_tojoin <- E24_fin %>%
 #### schmidt ####
 schmidt <- read_csv("./Data/Generated_Data/schmidt_timeseries.csv")
 
-#### filtered chla ####
-# filtchla <- read_csv("./Data/EDI2023/manual_chlorophyll_2014_2022.csv")
-# 
-# filtchla_A <- filtchla %>% 
-#   filter(Reservoir == "FCR",
-#          Site == 50,
-#          Depth_m == 1.6) %>% 
-#   mutate(Date = as.Date(DateTime)) %>% 
-#   select(Date, Chla_ugL)
 
 #### Combine ####
 # head(exo_daily) 

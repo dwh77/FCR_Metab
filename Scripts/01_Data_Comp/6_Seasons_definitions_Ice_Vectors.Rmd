@@ -114,7 +114,6 @@ seasons_ts_opWinter_physSummer <- dplyr::arrange(seasons_ts_opWinter_physSummer,
 ##Read in Ice data and make ice on data frame 
 ```{r}
 
-##ice dotted lines plot 
 #2014
 ice2014 <- data.frame(Date = seq(as.Date("2013-12-01"), as.Date("2014-03-31"), by="day"))
 ice2014dates <- c(seq(as.Date("2014-01-06"), as.Date("2014-01-14"), by="day"), seq(as.Date("2014-01-28"), as.Date("2014-02-22"), by="day"))
@@ -196,11 +195,13 @@ binded_icedata <- rbind(ice2014, ice2015, ice2016, ice2017, ice2018, ice2019, ic
 joined_opWinter_physSummer_seasons_ice <- left_join(seasons_ts_opWinter_physSummer, binded_icedata, by = "Date")
 
 write.csv(joined_opWinter_physSummer_seasons_ice, "../../Data/Generated_Data/Seasons_Ice_operWinter_physSummer.csv", row.names = F)
+
 ```
 
 ## Make equinox classifications 
 
 ```{r}
+
 timeframe <- data.frame(Date = seq(ymd("2015-11-05"), ymd("2022-03-01"), by = "1 day"))
 
 #have each seasons start on 21st - Winter on 21 Dec, Spring on 21 Mar, Summer on 21 Jun, and Fall on 21 Sep
@@ -253,7 +254,8 @@ write.csv(operational_seasonsA, "../../Data/Generated_Data/Seasons_operational_I
 
 ```
 
-##Make data frames to define seasons - winter based on ice not operational above and summer based on year to year strat
+## Physical winter and summer
+Make data frames to define seasons - winter based on ice (not operational above) and summer based on year to year strat
 
 ```{r}
 ## 2016

@@ -85,8 +85,8 @@ overlap_correction <- ggplot()+
 overlap_comparison <- overlap_nocorrection / overlap_correction
 
 
-ggsave(filename = "./Figures/Fig_S1_DO_offset_overlap_comparison.png", 
-       overlap_comparison, device = "png", width = 230, height = 150, units = "mm")
+ggsave(filename = "./Figures/Fig_S1_DO_offset_overlap_comparison.jpg", 
+       overlap_comparison, device = "jpg", width = 230, height = 150, units = "mm")
   
 
 

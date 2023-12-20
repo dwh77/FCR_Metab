@@ -58,8 +58,8 @@ SW_nldas_fcrmet
 
 dir.create("./Figures/")
 
-ggsave(filename = "./Figures/Fig_S2_Shortwave_NLDAS_FCRmet.png",
-       SW_nldas_fcrmet, device = "png", width = 180, height = 150, units = "mm")
+ggsave(filename = "./Figures/Fig_S2_Shortwave_NLDAS_FCRmet.jpg",
+       SW_nldas_fcrmet, device = "jpg", width = 180, height = 150, units = "mm")
 
 #### Comparing NLDAS to FCR WindSpeed data ####
 
@@ -81,8 +81,8 @@ Wind_nldas_fcrmet<- joinedSW %>%
 
 Wind_nldas_fcrmet
 
-ggsave(filename = "./Figures/Fig_S3_WindSpeed_NLDAS_FCRmet.png",
-       Wind_nldas_fcrmet, device = "png", width = 180, height = 150, units = "mm")
+ggsave(filename = "./Figures/Fig_S3_WindSpeed_NLDAS_FCRmet.jpg",
+       Wind_nldas_fcrmet, device = "jpg", width = 180, height = 150, units = "mm")
 
 
 
