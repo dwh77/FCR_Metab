@@ -28,7 +28,7 @@ exo <- catwalk_EDI %>%
 
 
 #### pulling in YSI data 
-ysi <- read_csv("./Data/Generated_Data/FCR_YSI_do_temp.csv")
+ysi <- read_csv("./Data/Generated_Data/FCR_YSI_DO_temp.csv")
 
 ysi_1_16 <- ysi %>% 
   dplyr::filter(Depth_m %in% c(1.0, 1.6)) %>% 

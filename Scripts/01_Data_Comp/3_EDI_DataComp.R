@@ -325,7 +325,7 @@ scc_thermistors <- temp_profiles_2018_22 %>%
 ### Find data for in between these two 
 
 ## YSI 
-ysi <- read_csv("./Data/Generated_Data/FCR_YSI_do_temp.csv")
+ysi <- read_csv("./Data/Generated_Data/FCR_YSI_DO_temp.csv")
 
 ysi18_temp_profiles_cleaned <- ysi %>% 
   dplyr::filter(DateTime > ymd("2017-12-31"),
@@ -346,7 +346,7 @@ ysi18_temp_profiles_cleaned <- ysi %>%
          temp9.0 = "9")
 
 ## CTD 
-ctd <- read_csv("./Data/Generated_Data/FCR_CTD_temp_do.csv")
+ctd <- read_csv("./Data/Generated_Data/FCR_CTD_temp_DO.csv")
 head(ctd)
 
 ctd18_temp_profiles_cleaned <- ctd %>% 

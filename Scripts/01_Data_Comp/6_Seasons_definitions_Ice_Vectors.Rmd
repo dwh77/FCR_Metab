@@ -107,7 +107,7 @@ fall$corrected_Year <- year(fall$Date)
 
 #Put all seasons together 
 seasons_ts_opWinter_physSummer <- rbind(fall, spring, summer, winter)
-seasons_ts_opWinter_physSummer <- dplyr::arrange(seasons_ts, Date)
+seasons_ts_opWinter_physSummer <- dplyr::arrange(seasons_ts_opWinter_physSummer, Date)
 ```
 
 
