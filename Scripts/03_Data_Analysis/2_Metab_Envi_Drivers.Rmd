@@ -28,6 +28,7 @@ metaboutput <- read.csv("../../Data/Model_Output/MetabOutput_QAQC_15_22.csv")
 metaboutput <- metaboutput %>% 
   select(solarDay, GPP_QAQC, R_QAQC, NEM_QAQC) %>% 
   mutate(solarDay = ymd(solarDay)) %>% 
+  mutate(R_QAQC = -R_QAQC) %>% 
   dplyr::rename(Date = solarDay)
 
 #### Envi Drivers 

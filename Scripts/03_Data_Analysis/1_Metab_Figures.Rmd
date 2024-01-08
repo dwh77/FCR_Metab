@@ -33,8 +33,9 @@ r_label <- c(expression(paste("R (mg ",O[2], " L"^-1, " day"^-1,")")))
 metaboutput <- read.csv("../../Data/Model_Output/MetabOutput_QAQC_15_22.csv")
 
 metaboutput1 <- metaboutput %>% 
-  select(solarDay, GPP_QAQC, R_QAQC, NEM_QAQC) %>% 
-  mutate(solarDay = ymd(solarDay))
+  select(solarDay, GPP_QAQC, R_QAQC, NEM_QAQC) %>%
+  mutate(R_QAQC = -R_QAQC,          #set R rates to negative
+         solarDay = ymd(solarDay))
 
 
 #bring in operational seasons definition 
@@ -332,11 +333,12 @@ metab_seasons <- metab_seasons_operational %>%
 full_ts <- ggplot(data = metab_seasons, aes(x = Date, y = GPP_QAQC))+
   geom_point(shape = 21, color="black", fill ="seagreen3",size=4, alpha = 0.5)+ 
   geom_hline(yintercept = 0, linetype=2, size = 1.5) +
-  geom_point(aes(x=Date,y=(R_QAQC*-1)),shape = 21, color = "black", fill ="brown",size=4, alpha = 0.5)+ 
+  geom_point(aes(x=Date,y=(R_QAQC)),shape = 21, color = "black", fill ="brown",size=4, alpha = 0.5)+ 
   scale_x_date(breaks = seq(ymd("2016-01-01"), ymd("2022-03-01"), by="12 months"),date_labels="%Y")+
   labs(y=metab_label, x=NULL)+ 
   theme_bw()+
   ggtitle("a")+
+  ylim(-19, 12)+
   theme(axis.title.x = element_text(size=18),
         axis.title.y = element_text(size=18),
         plot.title = element_text(size=24),
@@ -409,7 +411,7 @@ metab_seasons_long <- metab_seasons %>%
 
 metab_seasons <- metab_seasons %>% 
   filter(Date >= ymd("2015-11-11"),
-         Date <= ymd("2022-02-28"))
+         Date <= ymd("2022-02-28")) 
 
 #### % of daily fits 
 ## number of NAs
@@ -564,7 +566,8 @@ r_acrossyears_kruskal <- metab_seasons %>%
   geom_boxplot(alpha = 0.5)+
   geom_jitter(position=position_jitter(0.1))+
   labs(x = element_blank(),  y = r_label)+
-  ylim(0,17)+
+  ylim(-17,0)+
+  scale_y_reverse()+
   stat_compare_means(method = "kruskal.test", 
                      label.y = 14, label.x = 2, size = 6 )+ # , aes(label = paste0("p = ", after_stat(p.format)))
   theme_bw(base_size = 16)+
@@ -681,7 +684,7 @@ metab2022 <- metab_seasons %>%
   labs(y=NULL, x=NULL)+
   geom_hline(yintercept = 0, linetype=2, size = 1.5) +
   geom_point(shape = 21, color="black", fill ="seagreen3",size=4)+ # green 3,  lightgreen, seagreen3, springgreen3
-  geom_point(aes(x=Date,y=(R_QAQC*-1)),shape = 21, color = "black", fill ="brown",size=4)+ #gray30 for darker outline
+  geom_point(aes(x=Date,y=(R_QAQC)),shape = 21, color = "black", fill ="brown",size=4)+ #gray30 for darker outline
 
   geom_line(aes(x = Date, y = NEP_7day_rollmean), size = 2, color = "black", alpha = 0.8)+ #7 day rolling mean
   scale_x_date(breaks = seq(min(ymd("2021-12-20")), max(ymd("2022-02-22")), by = "21 days") , date_labels = "%d %b")+
@@ -715,7 +718,7 @@ metab2021 <- metab_seasons %>%
   labs(y=NULL, x=NULL)+   
   geom_hline(yintercept = 0, linetype=2, size = 1.5) +
   geom_point(aes(x = Date, y = GPP_QAQC), shape = 21, color="black", fill ="seagreen3",size=4)+
-  geom_point(aes(x=Date,y=(R_QAQC*-1)),shape = 21, color = "black", fill ="brown",size=4)+
+  geom_point(aes(x=Date,y=(R_QAQC)),shape = 21, color = "black", fill ="brown",size=4)+
   geom_line(aes(x = Date, y = NEP_7day_rollmean), size = 2, color = "black", alpha = 0.8)+ #7 day rolling mean
   scale_x_date(breaks = seq(min(ymd("2020-12-20")), max(ymd("2021-02-22")), by = "21 days") , date_labels = "%d %b")+
  theme_bw(base_size = 22)+
@@ -739,7 +742,7 @@ metab2020 <- metab_seasons %>%
   labs(y=metab_label2, x=NULL)+
   geom_hline(yintercept = 0, linetype=2, size = 1.5) +
   geom_point(shape = 21, color="black", fill ="seagreen3",size=4)+ 
-  geom_point(aes(x=Date,y=(R_QAQC*-1)),shape = 21, color = "black", fill ="brown",size=4)+
+  geom_point(aes(x=Date,y=(R_QAQC)),shape = 21, color = "black", fill ="brown",size=4)+
   geom_line(aes(x = Date, y = NEP_7day_rollmean), size = 2, color = "black", alpha = 0.8)+ #7 day rolling mean
   scale_x_date(breaks = seq(min(ymd("2019-12-20")), max(ymd("2020-02-22")), by = "21 days") , date_labels = "%d %b")+
  theme_bw(base_size = 22)+
@@ -797,7 +800,7 @@ metab2018 <- metab_seasons %>%
   labs(y=NULL, x=NULL)+   
   geom_hline(yintercept = 0, linetype=2, size = 1.5) +
   geom_point(shape = 21, color="black", fill ="seagreen3",size=4)+ 
-  geom_point(aes(x=Date,y=(R_QAQC*-1)),shape = 21, color = "black", fill ="brown",size=4)+
+  geom_point(aes(x=Date,y=(R_QAQC)),shape = 21, color = "black", fill ="brown",size=4)+
   geom_line(aes(x = Date, y = NEP_7day_rollmean), size = 2, color = "black", alpha = 0.8)+ #7 day rolling mean
   scale_x_date(breaks = seq(min(ymd("2017-12-20")), max(ymd("2018-02-22")), by = "21 days") , date_labels = "%d %b")+
   theme_bw(base_size = 22)+
@@ -824,7 +827,7 @@ metab2016 <- metab_seasons %>%
   geom_rect(data= rect1, aes(xmin=as.Date("2016-01-21"), xmax=as.Date("2016-02-21"), ymin=-Inf, ymax=Inf), fill="#FAF9F6", alpha=1, inherit.aes = FALSE)+
   geom_hline(yintercept = 0, linetype=2, size = 1.5) +
   geom_point(shape = 21, color="black", fill ="seagreen3",size=4)+ 
-  geom_point(aes(x=Date,y=(R_QAQC*-1)),shape = 21, color = "black", fill ="brown",size=4)+
+  geom_point(aes(x=Date,y=(R_QAQC)),shape = 21, color = "black", fill ="brown",size=4)+
   geom_line(aes(x = Date, y = NEP_7day_rollmean), size = 2, color = "black", alpha = 0.8)+ #7 day rolling mean
   scale_x_date(breaks = seq(min(ymd("2015-12-20")), max(ymd("2016-02-22")), by = "21 days") , date_labels = "%d %b")+
   theme_bw(base_size = 22)+
@@ -1043,6 +1046,7 @@ wintercomp_byyear_R <- winterNEP %>%
   stat_compare_means(method = "wilcox.test", aes(label = paste0("p = ", after_stat(p.format))), 
                      label.y = 3, label.x = 1, size = 6  )+
   theme_bw(base_size = 18)+
+  scale_y_reverse()+
   theme(legend.position = "none",
         axis.title.y = element_text(size=14),
         panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
@@ -1115,7 +1119,8 @@ left_join(boxdata_grouped, dunnR_seasons_letters_list, by = c("Season" = "Group"
   scale_shape_manual(values = c(0,1,2,5,6,7)) +
     stat_compare_means(method = "kruskal.test", label.y = -0.2, label.x = 1.3, size = 6, aes(label = sprintf("Kruskal-Wallis, p = %5.2f", as.numeric(..p.format..))))+ #round to 2 digits
   geom_text(aes(x = Season, label = Letter), y = 2.85, size = 6)+
-  ylim(-0.2,3)+
+  ylim(-3, 0.2)+
+  scale_y_reverse()+
   labs(fill = element_blank(),
        shape = "Year",
        x = element_blank(),
