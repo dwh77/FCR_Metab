@@ -57,8 +57,9 @@ overlap_nocorrection <- ggplot()+
   geom_line(data = exo_comp, mapping = aes(x = dateTime, y = DO, color = "EXO"))+
   # geom_point(data = ysi_1_16, mapping = aes(x = DateTime, y = DO_mgL, color = "YSI"))+
   labs(x = "Date", y = "DO (mg/L)")+
+  ylim(3,13.5)+
   ggtitle("DO sonde comparison - no correction")+
-  theme_classic()
+  theme_classic(base_size = 14)
 
 
 ## Calculating offset 
@@ -78,8 +79,9 @@ overlap_correction <- ggplot()+
   geom_line(data = exo_comp, mapping = aes(x = dateTime, y = DO, color = "EXO"))+
   # geom_point(data = ysi_1_16, mapping = aes(x = DateTime, y = DO_mgL, color = "YSI"))+
   labs(x = "Date", y = "DO (mg/L)")+
+  ylim(3,13.5)+
   ggtitle("DO sonde comparison - correction \n Insite_corr = Insite + 1.687")+
-  theme_classic()
+  theme_classic(base_size = 14)
 
 
 overlap_comparison <- overlap_nocorrection / overlap_correction
