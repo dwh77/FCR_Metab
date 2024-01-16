@@ -332,7 +332,7 @@ metab_seasons <- metab_seasons_operational %>%
   mutate(NEP_7day_rollmean = rollmean(NEM_QAQC, 7,
                                        fill = NA,
                                        na.rm = T,
-                                       align = "right"))
+                                       align = "center"))
 
 # make full TS of GPP and R
 full_ts <- ggplot(data = metab_seasons, aes(x = Date, y = GPP_QAQC))+
@@ -879,7 +879,7 @@ metab2016
 
 fig3 <- (metab2016 + metab2018 + metab2019) / (metab2020 + metab2021 + metab2022)
 
-ggsave(filename = "../../Figures/Fig3.jpg",
+ggsave(filename = "../../Figures/Fig3_V2_rollCentered.jpg",
        fig3, device = "jpg", width = 350, height = 200, units = "mm")
 
 
