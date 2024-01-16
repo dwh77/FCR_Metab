@@ -77,6 +77,7 @@ summary(driverdata_corr)
 
 cor_drivers <- rcorr(as.matrix(driverdata_corr), type = "spearman")
 spear_daily <- cor_drivers$r
+spear_daily_P <- cor_drivers$P
 write.csv(spear_daily, "../../Data/Generated_Data/Metab_daily_spear_cor.csv")
 corrplot(spear_daily, method = "number")
 
