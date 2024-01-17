@@ -16,6 +16,7 @@ library(gridExtra)
 library(stringr) #wrap x axis label text
 library(cowplot) #for plot_grid
 library(FSA) #dunn test
+library(car) #levene test
 
 metab_label <- c(expression(paste("GPP and R (mg ",O[2], " L"^-1, " day"^-1,")"))) 
 metab_label2 <- c(expression(paste("GPP, R, and NEP (mg ",O[2], " L"^-1, " day"^-1,")"))) 
@@ -1095,10 +1096,10 @@ wintercomp_acrossyears <- winterNEP %>%
   mutate(Ice_on_off = ifelse(icevector == 1, "Ice", "No Ice")) %>% 
   ggplot(aes(x = as.factor(Ice_on_off), y = NEP, fill = Ice_on_off))+   # , fill = Ice_on_off
   geom_boxplot(position = position_dodge(preserve = "single"), alpha = 1, outlier.shape = NA)+   #, outlier.alpha = 0
-  geom_jitter(aes(shape = as.character(corrected_Year)) , position=position_jitter(0.1), size = 4, fill = "white")+
+  geom_jitter(aes(shape = as.character(corrected_Year)), position=position_jitter(0.1), size = 4, fill = "white")+
   scale_shape_manual(values = c(0,1,2,5,6,7)) +
   geom_hline(yintercept = 0, linetype=2, size = 0.75) +
-  stat_compare_means(method = "wilcox.test", label.y = -1.5, label.x = 1, size = 6, aes(label = sprintf("Wilcoxon, p = %5.2f", as.numeric(..p.format..))))+ #round to 2 digits
+  stat_compare_means(method = "wilcox.test", paired = F, label.y = -1.5, label.x = 1, size = 6, aes(label = sprintf("Wilcoxon, p = %5.2f", as.numeric(..p.format..))))+ #round to 2 digits
   ylim(-1.5, 0.5)+
   labs(fill = element_blank(),
        shape = "Year",
@@ -1141,24 +1142,42 @@ dunnR_seasons <- FSA::dunnTest(R ~ Season, data = boxdata_grouped)
 dunnR_seasons_letters <- dunnR_seasons$res
 dunnR_seasons_letters_list <- rcompanion::cldList(comparison = dunnR_seasons_letters$Comparison, p.value = dunnR_seasons_letters$P.adj, threshold = 0.05)
 
+# Rseasonscomp_acrossyears <- 
+# left_join(boxdata_grouped, dunnR_seasons_letters_list, by = c("Season" = "Group")) %>% 
+#   ggplot(aes(x = factor(Season, level = level_order), y = R))+   # , fill = Ice_on_off
+#   geom_boxplot(aes(fill = Season), position = position_dodge(preserve = "single"), alpha = 0.5, outlier.shape = NA)+ #, outlier.alpha = 0
+#   geom_jitter(aes(shape = as.character(corrected_Year)) , position=position_jitter(0.3), size = 3, fill = "black")+
+#   scale_shape_manual(values = c(0,1,2,5,6,7)) +
+#     stat_compare_means(method = "kruskal.test", label.y = -0.2, label.x = 1.3, size = 6, aes(label = sprintf("Kruskal-Wallis, p = %5.2f", as.numeric(..p.format..))))+ #round to 2 digits
+#   geom_text(aes(x = Season, label = Letter), y = 2.85, size = 6)+
+#   scale_y_reverse(limits = c(0.2, -3))+
+#   labs(fill = element_blank(),
+#        shape = "Year",
+#        x = element_blank(),
+#        y = r_label)+
+#   theme_bw(base_size = 18)+
+#   theme(legend.position = "none",
+#         panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
+#   guides(fill = FALSE) +
+#  scale_fill_manual(values = c( "darkorange3", "darkturquoise", "green4", "slategray"))
+
 Rseasonscomp_acrossyears <- 
-left_join(boxdata_grouped, dunnR_seasons_letters_list, by = c("Season" = "Group")) %>% 
+  left_join(boxdata_grouped, dunnR_seasons_letters_list, by = c("Season" = "Group")) %>% 
   ggplot(aes(x = factor(Season, level = level_order), y = R))+   # , fill = Ice_on_off
-  geom_boxplot(aes(fill = Season), position = position_dodge(preserve = "single"), alpha = 0.5, outlier.shape = NA)+ #, outlier.alpha = 0
-  geom_jitter(aes(shape = as.character(corrected_Year)) , position=position_jitter(0.3), size = 3, fill = "black")+
-  scale_shape_manual(values = c(0,1,2,5,6,7)) +
-    stat_compare_means(method = "kruskal.test", label.y = -0.2, label.x = 1.3, size = 6, aes(label = sprintf("Kruskal-Wallis, p = %5.2f", as.numeric(..p.format..))))+ #round to 2 digits
+  #geom_boxplot(aes(fill = Season), position = position_dodge(preserve = "single"), alpha = 0.5, outlier.shape = NA)+ 
+  stat_summary(fun = median, shape = 4, size = 2)+
+  geom_jitter(aes(shape = as.character(corrected_Year)), fill = "black", position=position_jitter(0.1), size = 3)+
+  scale_shape_manual(values = c(11,21,22,23,24,25)) +
+  stat_compare_means(method = "kruskal.test", label.y = -0.2, label.x = 1.3, size = 6, aes(label = sprintf("Kruskal-Wallis, p = %5.2f", as.numeric(..p.format..))))+ #round to 2 digits
   geom_text(aes(x = Season, label = Letter), y = 2.85, size = 6)+
-  scale_y_reverse(limits = c(0.2, -3))+
+  ylim(0.2,-3)+
   labs(fill = element_blank(),
        shape = "Year",
        x = element_blank(),
        y = r_label)+
   theme_bw(base_size = 18)+
   theme(legend.position = "none",
-        panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
-  guides(fill = FALSE) +
- scale_fill_manual(values = c( "darkorange3", "darkturquoise", "green4", "slategray"))
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 
 
 # Seasonal GPP across years 
@@ -1168,32 +1187,32 @@ dunnGPP_seasons <- FSA::dunnTest(GPP ~ Season, data = boxdata_grouped)
 dunnGPP_seasons_letters <- dunnGPP_seasons$res
 dunnGPP_seasons_letters_list <- rcompanion::cldList(comparison = dunnGPP_seasons_letters$Comparison, p.value = dunnGPP_seasons_letters$P.adj, threshold = 0.05)
 
-GPPseasonscomp_acrossyears <- 
-  left_join(boxdata_grouped, dunnGPP_seasons_letters_list, by = c("Season" = "Group")) %>% 
-  ggplot(aes(x = factor(Season, level = level_order), y = GPP))+   # , fill = Ice_on_off
-  #geom_boxplot(aes(fill = Season), position = position_dodge(preserve = "single"), alpha = 0.5, outlier.shape = NA)+ 
-  stat_summary(fun = median, shape = 4, size = 2)+
-  geom_jitter(aes(shape = as.character(corrected_Year)) , position=position_jitter(0.3), size = 3, fill = "black")+
-  scale_shape_manual(values = c(0,1,2,5,6,7)) +
-      stat_compare_means(method = "kruskal.test", label.y = -0.2, label.x = 1.3, size = 6, aes(label = sprintf("Kruskal-Wallis, p = %5.2f", as.numeric(..p.format..))))+ #round to 2 digits
-  geom_text(aes(x = Season, label = Letter), y = 2.85, size = 6)+
-  ylim(-0.2,3)+
-  labs(fill = element_blank(),
-       shape = "Year",
-       x = element_blank(),
-       y = gpp_label)+
-  theme_bw(base_size = 18)+
-  theme(legend.position = "none",
-        panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
-  guides(fill = FALSE) +
- scale_fill_manual(values = c( "darkorange3", "darkturquoise", "green4", "slategray"))
+# GPPseasonscomp_acrossyears <- 
+#   left_join(boxdata_grouped, dunnGPP_seasons_letters_list, by = c("Season" = "Group")) %>% 
+#   ggplot(aes(x = factor(Season, level = level_order), y = GPP))+   # , fill = Ice_on_off
+#   #geom_boxplot(aes(fill = Season), position = position_dodge(preserve = "single"), alpha = 0.5, outlier.shape = NA)+ 
+#   stat_summary(fun = median, shape = 4, size = 2)+
+#   geom_jitter(aes(shape = as.character(corrected_Year)) , position=position_jitter(0.3), size = 3, fill = "black")+
+#   scale_shape_manual(values = c(0,1,2,5,6,7)) +
+#       stat_compare_means(method = "kruskal.test", label.y = -0.2, label.x = 1.3, size = 6, aes(label = sprintf("Kruskal-Wallis, p = %5.2f", as.numeric(..p.format..))))+ #round to 2 digits
+#   geom_text(aes(x = Season, label = Letter), y = 2.85, size = 6)+
+#   ylim(-0.2,3)+
+#   labs(fill = element_blank(),
+#        shape = "Year",
+#        x = element_blank(),
+#        y = gpp_label)+
+#   theme_bw(base_size = 18)+
+#   theme(legend.position = "none",
+#         panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
+#   guides(fill = FALSE) +
+#  scale_fill_manual(values = c( "darkorange3", "darkturquoise", "green4", "slategray"))
 
-#### testing Jennies suggestion
+GPPseasonscomp_acrossyears <- 
  left_join(boxdata_grouped, dunnGPP_seasons_letters_list, by = c("Season" = "Group")) %>% 
   ggplot(aes(x = factor(Season, level = level_order), y = GPP))+   # , fill = Ice_on_off
   #geom_boxplot(aes(fill = Season), position = position_dodge(preserve = "single"), alpha = 0.5, outlier.shape = NA)+ 
   stat_summary(fun = median, shape = 4, size = 2)+
-  geom_jitter(aes(shape = as.character(corrected_Year), fill = as.character(corrected_Year)) , position=position_jitter(0.3), size = 3)+
+  geom_jitter(aes(shape = as.character(corrected_Year)), fill = "black" , position=position_jitter(0.1), size = 3)+
   scale_shape_manual(values = c(11,21,22,23,24,25)) +
   stat_compare_means(method = "kruskal.test", label.y = -0.2, label.x = 1.3, size = 6, aes(label = sprintf("Kruskal-Wallis, p = %5.2f", as.numeric(..p.format..))))+ #round to 2 digits
   geom_text(aes(x = Season, label = Letter), y = 2.85, size = 6)+
@@ -1204,35 +1223,53 @@ GPPseasonscomp_acrossyears <-
        y = gpp_label)+
   theme_bw(base_size = 18)+
   theme(legend.position = "none",
-        panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
-  guides(fill = FALSE) 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+ 
 
 
 # Seasonal NEP across years 
 kruskalNEP_seasons <- kruskal.test(NEP ~ Season, data = boxdata_grouped)
 kruskalNEP_seasons
 
+# NEPseasonscomp_acrossyears <- boxdata_grouped %>% 
+#   ggplot(aes(x = factor(Season, level = level_order), y = NEP))+   # , fill = Ice_on_off
+#   geom_boxplot(aes(fill = Season), position = position_dodge(preserve = "single"), alpha = 0.5, outlier.shape = NA)+ #, outlier.alpha = 0
+#   geom_jitter(aes(shape = as.character(corrected_Year)) , position=position_jitter(0.3), size = 3, fill = "black")+
+#   scale_shape_manual(values = c(0,1,2,5,6,7)) +
+#   geom_hline(yintercept = 0, linetype=2, size = 0.75) +
+#       stat_compare_means(method = "kruskal.test", label.y = -1.7, label.x = 1.3, size = 6, aes(label = sprintf("Kruskal-Wallis, p = %5.2f", as.numeric(..p.format..))))+ #round to 2 digits
+#   ylim(-1.7, 0.5)+
+#   labs(fill = element_blank(),
+#        shape = "Year",
+#        x = element_blank(),
+#        y = nep_label)+
+#   theme_bw(base_size = 18)+
+#   theme(legend.position = "right",
+#         panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
+#   guides(fill = FALSE) +
+#  scale_fill_manual(values = c( "darkorange3", "darkturquoise", "green4", "slategray"))
+
 NEPseasonscomp_acrossyears <- boxdata_grouped %>% 
-  ggplot(aes(x = factor(Season, level = level_order), y = NEP))+   # , fill = Ice_on_off
-  geom_boxplot(aes(fill = Season), position = position_dodge(preserve = "single"), alpha = 0.5, outlier.shape = NA)+ #, outlier.alpha = 0
-  geom_jitter(aes(shape = as.character(corrected_Year)) , position=position_jitter(0.3), size = 3, fill = "black")+
-  scale_shape_manual(values = c(0,1,2,5,6,7)) +
+    ggplot(aes(x = factor(Season, level = level_order), y = NEP))+   # , fill = Ice_on_off
+  #geom_boxplot(aes(fill = Season), position = position_dodge(preserve = "single"), alpha = 0.5, outlier.shape = NA)+ 
+  stat_summary(fun = median, shape = 4, size = 2)+
+  geom_jitter(aes(shape = as.character(corrected_Year)), fill = "black",  #, fill = as.character(corrected_Year)
+               position=position_jitter(0.1), size = 3)+
+  scale_shape_manual(values = c(11,21,22,23,24,25)) +
   geom_hline(yintercept = 0, linetype=2, size = 0.75) +
-      stat_compare_means(method = "kruskal.test", label.y = -1.7, label.x = 1.3, size = 6, aes(label = sprintf("Kruskal-Wallis, p = %5.2f", as.numeric(..p.format..))))+ #round to 2 digits
-  ylim(-1.7, 0.5)+
-  labs(fill = element_blank(),
+  stat_compare_means(method = "kruskal.test", label.y = -2.5, label.x = 1.3, size = 6, aes(label = sprintf("Kruskal-Wallis, p = %5.2f", as.numeric(..p.format..))))+ #round to 2 digits
+  ylim(-2.5, 0.5)+
+  labs(fill = "color",
        shape = "Year",
        x = element_blank(),
        y = nep_label)+
   theme_bw(base_size = 18)+
   theme(legend.position = "right",
-        panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
-  guides(fill = FALSE) +
- scale_fill_manual(values = c( "darkorange3", "darkturquoise", "green4", "slategray"))
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 
 
 #combine plots
-NEPseasonscomp_acrossyears + GPPseasonscomp_acrossyears + Rseasonscomp_acrossyears
+Rseasonscomp_acrossyears + GPPseasonscomp_acrossyears + NEPseasonscomp_acrossyears
 
 ```
 
@@ -1248,7 +1285,7 @@ fig4bot<- Rseasonscomp_acrossyears + GPPseasonscomp_acrossyears + NEPseasonscomp
 
 fig4 <- fig4top / fig4bot + plot_annotation(tag_levels = 'a')
 
-ggsave(filename = "../../Figures/Fig4_V2.jpg",
+ggsave(filename = "../../Figures/Fig4_V3.jpg",
        fig4, device = "jpg", width = 350, height = 200, units = "mm")
 
 
