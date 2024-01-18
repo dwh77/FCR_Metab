@@ -1250,50 +1250,6 @@ ggsave(filename = "../../Figures/Fig4.jpg",
 
 
 
-## Fig S7; 9m DO under ice and temp profiles 
-
-```{r}
-#read in data
-edi_catwalk <- read_csv("../../Data/EDI2023/FCR_Catwalk_2018_2022.csv")
-
-## set up data
-do_underice <- edi_catwalk %>% 
-  mutate(Date = as.Date(DateTime),
-         Month = month(Date)) %>% 
-  filter(Month %in% c(12,1,2)) %>% 
-  group_by(Date) %>% 
-  summarise(DO_9m = mean(RDO_mgL_9_adjusted, na.rm = T),
-            DO_5m = mean(RDO_mgL_5_adjusted, na.rm = T),
-            DO_1.6m = mean(EXODO_mgL_1, na.rm = T)) %>% 
-  pivot_longer(-1)
-
-
-seasons_do_underice <- left_join(seasons_ts_operational, do_underice, by = "Date") %>% 
-  filter(Season == "Winter")
-
-##plot and save
-DOprofile_underice <- seasons_do_underice %>% 
-  filter(Date > ymd("2018-12-01")) %>% 
-  mutate(Month = month(Date),
-         Day = day(Date),
-         FakeYear = ifelse(Month == 12, 2023, 2024), 
-         FakeDate = ymd(paste(FakeYear, Month, Day, sep = "-"))) %>% 
-  ggplot(aes(x = FakeDate, y = value, color = name))+
-  geom_point()+
-  labs(x = element_blank(),  y = "DO (mg/L)", color = "Depth")+
-  facet_wrap(~cor_Year, ncol = 1)+
-  ylim(0,15)+
-  theme_bw(base_size = 16)
-
-DOprofile_underice
-
-ggsave(filename = "../../Figures/Fig_S7_DOunderIce.jpg",
-       DOprofile_underice, device = "jpg", width = 200, height = 250, units = "mm")
-  
-
-```
-
-
 
 
 
