@@ -34,7 +34,7 @@ Next run the following scripts located in './Scripts/03_Data_Analysis/' in order
 
 The workflow above is designed to be able to recreate the analysis at multiple entry points. All data products needed to run the metabolism model are created in './Scripts/01_Data_Comp/' and are stored in './Data/Model_Input/'. 
 
-To just rerun the data analysis scripts, scripts 1-3 in './Scripts/03_Data_Analysis/' can be run, as all output data from the metabolism model are store in './Data/Model_Output/' along with a QAQCd csv file generated from script 2_Metab_Outputs_QAQC.R.
+To just rerun the data analysis scripts and generate figures, scripts 1-3 in './Scripts/03_Data_Analysis/' can be run, as all output data from the metabolism model are stored in './Data/Model_Output/' along with a QAQCd csv file (MetabOutput_QAQC_15_22.csv) generated from script 2_Metab_Outputs_QAQC.R.
 
 
 ## Data folder 
