@@ -38,19 +38,118 @@ metab_seasons <- metab_seasons_operational %>%
 ## Determine seasons and winter NEPs per year 
 
 ```{r}
+# 
+# #get seasonal mean NEP for each year 
+# seasons_NEPs <- metab_seasons %>%  
+#   #filter(corrected_Year %in% c(2019,2021)) %>% 
+#   filter(Season != "Winter") %>% 
+#   group_by(Season, corrected_Year) %>% 
+#   summarise(NEP_mean = mean(NEM_QAQC, na.rm = T)) 
+# 
+# seasons_NEPs
+# 
+# #get ice covered vs ice free mean NEP for each winter 
+# winterNEPs <- metab_seasons %>% 
+#   #filter(corrected_Year %in% c(2019,2021)) %>% 
+#   filter(Season == "Winter") %>% 
+#   mutate(icevector = ifelse(icevector == 1, "ON", "OFF")) %>% 
+#   group_by(corrected_Year, Season, icevector) %>% 
+#   summarise(NEP_mean = mean(NEM_QAQC, na.rm = T))
+# 
+# winterNEPs
+# 
+# underice_2019 <- winterNEPs %>% 
+#   filter(corrected_Year == 2019, Season == "Winter", icevector == "ON") 
+#   
+# underice_2019NEP <- (underice_2019$NEP_mean)
+# 
+# underice_2021 <- winterNEPs %>% 
+#   filter(corrected_Year == 2021, Season == "Winter", icevector == "ON") 
+#   
+# underice_2021NEP <- (underice_2021$NEP_mean)
+# 
+# 
+# 
+# #make data frame that assigns the mean to each day of the year for 2019-2021 (the years where we have a mean for each time period)
+# 
+# Dates <- data.frame(Date = seq(ymd("2015-11-09"), ymd("2022-03-01"), by = "days" ))
+# 
+# dates_df <- left_join(Dates, seasons_ts_operational, by = "Date") %>% 
+#     mutate(icevector = ifelse(icevector == 1, "ON", "OFF"),
+#            icevector = ifelse(Season == "Winter", icevector, NA)) %>% 
+#   rename(corrected_Year = cor_Year) %>% 
+#   select(Date, corrected_Year, Season, icevector)
+# 
+# 
+# dates_df_A <- left_join(dates_df, seasons_NEPs, by = c("corrected_Year", "Season"))
+# 
+# dates_df_B <- left_join(dates_df_A, winterNEPs, by = c("corrected_Year", "Season", "icevector")) 
+# 
+# Dates_FIN <- dates_df_B %>% 
+#   mutate(NEP = ifelse(is.na(NEP_mean.x), NEP_mean.y, NEP_mean.x)) %>% 
+#   select(Date, corrected_Year, Season, icevector, NEP)
 
+```
+
+## Trying just replacing NAs 
+
+```{r}
+
+#### Get variables to replace NAs
 #get seasonal mean NEP for each year 
 seasons_NEPs <- metab_seasons %>%  
-  #filter(corrected_Year %in% c(2019,2021)) %>% 
   filter(Season != "Winter") %>% 
   group_by(Season, corrected_Year) %>% 
   summarise(NEP_mean = mean(NEM_QAQC, na.rm = T)) 
 
 seasons_NEPs
 
-#get ice covered vs ice free mean NEP for each winter 
+#Fall 2018
+fall_2018 <- seasons_NEPs %>% 
+  filter(corrected_Year == 2018, Season == "Fall") 
+fall_2018NEP <- (fall_2018$NEP_mean)
+
+#Fall 2019
+fall_2019 <- seasons_NEPs %>% 
+  filter(corrected_Year == 2019, Season == "Fall") 
+fall_2019NEP <- (fall_2019$NEP_mean)
+
+#Fall 2020
+fall_2020 <- seasons_NEPs %>% 
+  filter(corrected_Year == 2020, Season == "Fall") 
+fall_2020NEP <- (fall_2020$NEP_mean)
+
+#Fall 2021
+fall_2021 <- seasons_NEPs %>% 
+  filter(corrected_Year == 2021, Season == "Fall") 
+fall_2021NEP <- (fall_2021$NEP_mean)
+
+
+#spring 2019
+spring_2019 <- seasons_NEPs %>% 
+  filter(corrected_Year == 2019, Season == "Spring") 
+spring_2019NEP <- (spring_2019$NEP_mean)
+
+#spring 2021
+spring_2021 <- seasons_NEPs %>% 
+  filter(corrected_Year == 2021, Season == "Spring") 
+spring_2021NEP <- (spring_2021$NEP_mean)
+
+
+#summer 2019
+summer_2019 <- seasons_NEPs %>% 
+  filter(corrected_Year == 2019, Season == "Summer") 
+summer_2019NEP <- (summer_2019$NEP_mean)
+
+#summer 2021
+summer_2021 <- seasons_NEPs %>% 
+  filter(corrected_Year == 2021, Season == "Summer") 
+summer_2021NEP <- (summer_2021$NEP_mean)
+
+
+#### get ice covered vs ice free mean NEP for each winter 
 winterNEPs <- metab_seasons %>% 
-  #filter(corrected_Year %in% c(2019,2021)) %>% 
+  filter(corrected_Year %in% c(2019,2021)) %>% 
   filter(Season == "Winter") %>% 
   mutate(icevector = ifelse(icevector == 1, "ON", "OFF")) %>% 
   group_by(corrected_Year, Season, icevector) %>% 
@@ -58,38 +157,78 @@ winterNEPs <- metab_seasons %>%
 
 winterNEPs
 
+#under ice 2019
 underice_2019 <- winterNEPs %>% 
   filter(corrected_Year == 2019, Season == "Winter", icevector == "ON") 
-  
 underice_2019NEP <- (underice_2019$NEP_mean)
 
+#winter 2019 no ice
+icefree_2019 <- winterNEPs %>% 
+  filter(corrected_Year == 2019, Season == "Winter", icevector == "OFF") 
+icefree_2019NEP <- (icefree_2019$NEP_mean)
+
+#under ice 2021
 underice_2021 <- winterNEPs %>% 
   filter(corrected_Year == 2021, Season == "Winter", icevector == "ON") 
-  
 underice_2021NEP <- (underice_2021$NEP_mean)
 
+#winter 2021 no ice
+icefree_2021 <- winterNEPs %>% 
+  filter(corrected_Year == 2021, Season == "Winter", icevector == "OFF") 
+icefree_2021NEP <- (icefree_2021$NEP_mean)
 
 
-#make data frame that assigns the mean to each day of the year for 2019-2021 (the years where we have a mean for each time period)
+### Set up data needed for simulation and fill NAs 
 
-Dates <- data.frame(Date = seq(ymd("2015-11-09"), ymd("2022-03-01"), by = "days" ))
+#Get fall 2018 and 2020 for when ice expands past 40 additional days 
+metab_fall18 <- metab_seasons %>%
+  filter(corrected_Year == 2018,
+         Season == "Fall") %>%
+  mutate(NEP = NEM_QAQC) %>%
+  mutate(NEP = ifelse(is.na(NEM_QAQC) & Season == "Fall", fall_2018NEP, NEM_QAQC)
+                )
 
-dates_df <- left_join(Dates, seasons_ts_operational, by = "Date") %>% 
-    mutate(icevector = ifelse(icevector == 1, "ON", "OFF"),
-           icevector = ifelse(Season == "Winter", icevector, NA)) %>% 
-  rename(corrected_Year = cor_Year) %>% 
-  select(Date, corrected_Year, Season, icevector)
+metab_fall20 <- metab_seasons %>%
+  filter(corrected_Year == 2020,
+         Season == "Fall") %>%
+  mutate(NEP = NEM_QAQC) %>%
+  mutate(NEP = ifelse(is.na(NEM_QAQC) & Season == "Fall", fall_2020NEP, NEM_QAQC)
+                )
 
+#set up 2019 
+metab19 <- metab_seasons %>%
+  filter(corrected_Year == 2019) %>%
+  mutate(icevector = ifelse(icevector == 1, "ON", "OFF"),
+           icevector = ifelse(Season == "Winter", icevector, NA)) %>%
+  mutate(NEP = NEM_QAQC) %>%
+  mutate(NEP = ifelse(is.na(NEM_QAQC) & Season == "Fall", fall_2019NEP, NEM_QAQC),
+         NEP = ifelse(is.na(NEM_QAQC) & Season == "Spring", spring_2019NEP, NEP),
+         NEP = ifelse(is.na(NEM_QAQC) & Season == "Summer", summer_2019NEP, NEP),
+         NEP = ifelse(is.na(NEM_QAQC) & Season == "Winter" & icevector == "OFF", icefree_2019NEP, NEP),
+         NEP = ifelse(is.na(NEM_QAQC) & Season == "Winter" & icevector == "ON", underice_2019NEP, NEP)
+                )
 
-dates_df_A <- left_join(dates_df, seasons_NEPs, by = c("corrected_Year", "Season"))
+#set up 2021
+metab21 <- metab_seasons %>%
+  filter(corrected_Year == 2021) %>%
+  mutate(icevector = ifelse(icevector == 1, "ON", "OFF"),
+           icevector = ifelse(Season == "Winter", icevector, NA)) %>%
+  mutate(NEP = NEM_QAQC) %>%
+  mutate(NEP = ifelse(is.na(NEM_QAQC) & Season == "Fall", fall_2021NEP, NEM_QAQC),
+         NEP = ifelse(is.na(NEM_QAQC) & Season == "Spring", spring_2021NEP, NEP),
+         NEP = ifelse(is.na(NEM_QAQC) & Season == "Summer", summer_2021NEP, NEP),
+         NEP = ifelse(is.na(NEM_QAQC) & Season == "Winter" & icevector == "OFF", icefree_2021NEP, NEP),
+         NEP = ifelse(is.na(NEM_QAQC) & Season == "Winter" & icevector == "ON", underice_2021NEP, NEP)
+                )
 
-dates_df_B <- left_join(dates_df_A, winterNEPs, by = c("corrected_Year", "Season", "icevector")) 
+#bind data together and format for simulation 
+Dates_FIN <- rbind(metab_fall18, metab19, metab_fall20, metab21) %>%
+  select(Date, corrected_Year, Season, icevector, NEP) %>%
+  slice(-366)
 
-Dates_FIN <- dates_df_B %>% 
-  mutate(NEP = ifelse(is.na(NEP_mean.x), NEP_mean.y, NEP_mean.x)) %>% 
-  select(Date, corrected_Year, Season, icevector, NEP)
 
 ```
+
 
 
 ## Run Simulations
@@ -244,6 +383,11 @@ k201921long <- k201921 %>%  pivot_longer(-8)
 kruskal <- kruskal.test(value ~ name, data = k201921long)
 kruskal
 
+k201921long %>% 
+  ggplot(aes(x = name, y = value))+
+  geom_boxplot()
+
+
 #run dunn post hoc test
 dunn <- FSA::dunnTest(value ~ name, data = k201921long)
 dunn_letters <- dunn$res
@@ -253,9 +397,20 @@ dunn_letters_list
 
 
 
+```
+
+## recreate figure 2b
+
+```{r}
+head(metab_simulations_TEST)
+
+
 
 
 ```
+
+
+
 
 
 
