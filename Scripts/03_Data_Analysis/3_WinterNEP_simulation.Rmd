@@ -170,8 +170,6 @@ metab21 <- metab_seasons %>%
 #bind data together and format for simulation 
 Dates_FIN <- rbind(metab_fall18, metab19, metab_fall20, metab21) %>%
   select(Date, corrected_Year, Season, icevector, NEP) 
-  #slice(-366)
-
 
 ```
 
@@ -376,10 +374,10 @@ k201921long %>%
 
 
 #run dunn post hoc test
-dunn <- FSA::dunnTest(value ~ name, data = k201921long)
-dunn_letters <- dunn$res
-dunn_letters_list <- rcompanion::cldList(comparison = dunn_letters$Comparison, p.value = dunn_letters$P.adj, threshold = 0.05)
-dunn_letters_list
+# dunn <- FSA::dunnTest(value ~ name, data = k201921long)
+# dunn_letters <- dunn$res
+# dunn_letters_list <- rcompanion::cldList(comparison = dunn_letters$Comparison, p.value = dunn_letters$P.adj, threshold = 0.05)
+# dunn_letters_list
 
 
 
