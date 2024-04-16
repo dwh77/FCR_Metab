@@ -383,9 +383,6 @@ NEP_full_ts
 ```
 
 
-
-
-
 ## Fig 2 - full TS and NEP summary by year 
 
 ```{r}
@@ -547,6 +544,74 @@ iceonoff_summaryStats_clean
 
 ```
 
+##### Revisions test 
+
+```{r}
+####table 1 distributions 
+metab_seasons_long |> 
+  ggplot()+
+  geom_density(aes(value))+
+  facet_grid(name~Season)+
+  theme_bw()
+
+metab_seasons_long |> 
+  ggplot()+
+  geom_density(aes(value, fill = Season))+
+  facet_wrap(~name, scales = "free_x")+
+  theme_bw()
+
+
+#### rates arround turnover 
+metab_seasons |> 
+  filter(Date >= paste(year(Date), 10, 1, sep = "-"),
+         Date <= paste(year(Date), 12, 1, sep = "-")) |> 
+  mutate(Year = year(Date)) |> 
+  mutate(fakeDate = ymd(paste(2030, month(Date), day(Date), sep = "-"))) |> 
+  ggplot(aes(x = fakeDate, y = NEM_QAQC))+
+  geom_point()+
+  geom_vline(xintercept = ymd("2030-10-14"))+
+  geom_vline(xintercept = ymd("2030-11-03"))+
+  facet_wrap(~Year, ncol = 1)+
+  theme_bw()
+
+metab_seasons |> 
+  filter(Date >= paste(year(Date), 10, 1, sep = "-"),
+         Date <= paste(year(Date), 12, 1, sep = "-")) |> 
+  mutate(Year = year(Date)) |> 
+  mutate(fakeDate = ymd(paste(2030, month(Date), day(Date), sep = "-"))) |> 
+  ggplot(aes(x = fakeDate, y = GPP_QAQC))+
+  geom_point()+
+  geom_vline(xintercept = ymd("2030-10-14"))+
+  geom_vline(xintercept = ymd("2030-11-03"))+
+  facet_wrap(~Year, ncol = 1)+
+  theme_bw()
+
+metab_seasons |> 
+  filter(Date >= paste(year(Date), 10, 1, sep = "-"),
+         Date <= paste(year(Date), 12, 1, sep = "-")) |> 
+  mutate(Year = year(Date)) |> 
+  mutate(fakeDate = ymd(paste(2030, month(Date), day(Date), sep = "-"))) |> 
+  ggplot(aes(x = fakeDate, y = R_QAQC))+
+  geom_point()+
+  geom_vline(xintercept = ymd("2030-10-14"))+
+  geom_vline(xintercept = ymd("2030-11-03"))+
+  facet_wrap(~Year, ncol = 1)+
+  theme_bw()
+
+
+### line 325-326 are years and seasons balanced talbe 
+metab_seasons |> 
+  group_by(corrected_Year, Season ) |> 
+  summarise(total =   paste(sum(!is.na(NEM_QAQC)), "/"  , (sum(!is.na(NEM_QAQC)) + sum(is.na(NEM_QAQC))), sep = "")
+            ) |> 
+  pivot_wider(names_from = Season, values_from = total)
+  
+# metab_seasons |> 
+#   group_by(corrected_Year) |> 
+#   summarise(total =   paste(sum(!is.na(NEM_QAQC)), "/"  , (sum(!is.na(NEM_QAQC)) + sum(is.na(NEM_QAQC))), sep = ""))
+
+
+```
 
 ## Fig S5, Table S2 and S3
 Yearly stats for supplement table and figures
