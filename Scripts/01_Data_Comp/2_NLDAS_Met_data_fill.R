@@ -38,8 +38,6 @@ joinedSW <- left_join(nldas_filt, fcrmet_filt, by = c("time" = "Datetime"))
 #### Weibul correction of windspeed #### 
 
 ##pdf plots 
-head(joinedSW)
-
 joinedSW |> 
   select(time, WindSpeed, Wind_hourly) |> 
   rename(WindSpeed_NLDAS = WindSpeed) |> 
@@ -49,6 +47,7 @@ joinedSW |>
 
 
 ##calculate weibul for local wind speed
+#make data frame to hold weibul curve data
 data <- data.frame(x = seq(0, 15, length.out = 100))
 
 #remove NAs
@@ -121,83 +120,37 @@ data |>
   labs(x = "Wind Speed (m/s)", y = "Density", color = "Data and Grouping")+
   theme_classic()
 
-# #nldas
-# EnvStats::eweibull(NLDASSW_noNA$WindSpeed, method = "mle") #all 
-# EnvStats::eweibull(joinedSW_leafon$WindSpeed, method = "mle") #leaf on
-# EnvStats::eweibull(joinedSW_leafoff$WindSpeed, method = "mle") #leaf on
-# 
-# #local
-# EnvStats::eweibull(localSW_noNA$Wind_hourly, method = "mle") #all
-# EnvStats::eweibull(joinedSW_leafon$Wind_hourly, method = "mle") #leaf on
-# EnvStats::eweibull(joinedSW_leafoff$Wind_hourly, method = "mle") #leaf off
+#### corrected NLDAS data using weibul distributions 
 
-
-
-
-# joinedSW$weibull_localwind <- dweibull(joinedSW$Wind_hourly, shape = local_shape, scale = local_scale)
-# joinedSW$weibull_nldaswind <- dweibull(joinedSW$WindSpeed, shape = nldas_shape, scale = nldas_scale)
-# joinedSW$weibull_nldas_localparmas <- dweibull(joinedSW$WindSpeed, shape = local_shape, scale = local_scale)
-# 
-# 
-# joinedSW |> 
-#   ggplot()+
-#   geom_line(aes(x = Wind_hourly, y = weibull_localwind, color = "local"))+
-#   geom_line(aes(x = WindSpeed, y = weibull_nldaswind, color = "nldas"))+
-#   geom_line(aes(x = WindSpeed, y = weibull_nldas_localparmas, color = "nldas_localparam"))
-
-##get df of percentiles for local wind
-#function to get 
-# z<-EnvStats::eqweibull(localSW_noNA$Wind_hourly, p = 0.9)
-# z$quantiles[1]
-
+#vectors to make data frames
 percentiles <- seq(0.001, 0.999, by = 0.001)
 x <- c(1:999)
 
+#local weibul percentiles 
 weibul_local_df <- data.frame("Percentile" = percentiles, "x_local" = x)
 
-for (i in (weibul_local_df_2$Percentile)) {
-  
-
+for(i in (weibul_local_df$Percentile)) {
    z <- EnvStats::eqweibull(localSW_noNA$Wind_hourly, p = i)
    y <- z$quantiles[1]
    
    weibul_local_df <- weibul_local_df |> 
      mutate(x_local = ifelse(Percentile == i, y, x_local))
- 
-}
+ }
 
-##get df of percentiles for local wind
-##old function
-# percentiles <- seq(1, 99, by = 1)
-# weibul_nldas_df <- setNames(data.frame(matrix(ncol = 2, nrow = 99)), c("Percentile", "x_nldas"))
 
-# for (i in 1:length(percentiles)) {
-#   z <- EnvStats::eqweibull(NLDASSW_noNA$WindSpeed, p = i/100)
-#   y <- z$quantiles[1]
-#   
-#   weibul_nldas_df$Percentile[i] <- i
-#   weibul_nldas_df$x_nldas[i] <- y
-#   
-# }
-
+#nldas weibul percentiles
 weibul_nldas_df <- data.frame("Percentile" = percentiles, "x_nldas" = x)
 
-for (i in (weibul_nldas_df_2$Percentile)) {
-  
-  
+for(i in (weibul_nldas_df$Percentile)) {
   z <- EnvStats::eqweibull(NLDASSW_noNA$WindSpeed, p = i)
   y <- z$quantiles[1]
   
   weibul_nldas_df <- weibul_nldas_df |> 
     mutate(x_nldas = ifelse(Percentile == i, y, x_nldas))
-  
-}
+  }
 
 
-
-
-
-
+#bind weibul percentiles into one data frame
 weibul_percentil_bind <- left_join(weibul_local_df, weibul_nldas_df, by = "Percentile")
 
 
@@ -241,14 +194,11 @@ corrected_nldasWIND |>
   ggplot()+
   geom_density(aes(x_local))+ xlim(0,15)
 
+nldas_wind_weibulcorrected <- corrected_nldasWIND |> 
+  select(time, x_local) |> 
+  rename(WindSpeed_nldas_weibulcor = x_local)
 
-###trials 
-quantile(localSW_noNA$Wind_hourly, probs = seq(0.01, 0.99, by = 0.01))
-
-
-quantile(7, EnvStats::eweibull(NLDASSW_noNA$WindSpeed, method = "mle"))
-
-quantile(joinedSW$WindSpeed, rnorm(joinedSW$Wind_hourly))
+joinedSW <- left_join(joinedSW, nldas_wind_weibulcorrected, by = 'time')
 
 #### Comparing NLDAS to FCR shortwave data ####
 
@@ -278,7 +228,7 @@ ggsave(filename = "./Figures/Fig_S2_Shortwave_NLDAS_FCRmet.jpg",
 
 #### Comparing NLDAS to FCR WindSpeed data ####
 
-Wind_nldas_fcrmet<- joinedSW %>% 
+Wind_nldas_fcrmet <- joinedSW %>% 
   select(time, Wind_hourly, WindSpeed) %>% 
   rename(FCRmet = Wind_hourly,
          NLDAS = WindSpeed) %>% 
@@ -296,26 +246,44 @@ Wind_nldas_fcrmet<- joinedSW %>%
 
 Wind_nldas_fcrmet
 
-ggsave(filename = "./Figures/Fig_S3_WindSpeed_NLDAS_FCRmet.jpg",
-       Wind_nldas_fcrmet, device = "jpg", width = 180, height = 150, units = "mm")
+Wind_nldasWeibul_fcrmet <- joinedSW %>% 
+  select(time, Wind_hourly, WindSpeed_nldas_weibulcor) %>% 
+  rename(FCRmet = Wind_hourly,
+         NLDAS = WindSpeed_nldas_weibulcor) %>% 
+  ggplot(aes(x = NLDAS , y = FCRmet))+
+  geom_point()+
+  ggtitle("WindSpeed FCR met ~ NLDAS")+
+  labs(x = "NLDAS WindSpeed", y = "FCR met station WindSpeed")+
+  stat_poly_line(method = "lm", linewidth = 2)+
+  stat_poly_eq(formula=y~x, label.x = "left", label.y="top", parse=TRUE, inherit.aes = F,
+               aes(x = NLDAS, y = FCRmet, label=paste(..adj.rr.label..,..p.value.label..,sep="~~~"),size=3))+
+  stat_poly_eq(label.y = 0.8,
+               aes(label = after_stat(eq.label))) +
+  geom_abline(slope = 1, intercept = 0, size=2, linetype =2, col = "red")+ #1:1 line
+  theme_classic()
+
+Wind_nldasWeibul_fcrmet
+
+ggsave(filename = "./Figures/Fig_S3_WindSpeed_NLDASweibul_FCRmet.jpg",
+       Wind_nldasWeibul_fcrmet, device = "jpg", width = 180, height = 150, units = "mm")
 
 
 
 #### Make input files for SW and WindSpeed based on NLDAS ####
 
 sw_lm <- summary(lm(joinedSW$SW_hourly~joinedSW$ShortWave))
-wind_lm <- summary(lm(joinedSW$Wind_hourly~joinedSW$WindSpeed))
+# wind_lm <- summary(lm(joinedSW$Wind_hourly~joinedSW$WindSpeed))
 
 
 model_input <- joinedSW %>% 
-  select(time, SW_hourly, Wind_hourly, ShortWave, WindSpeed) %>% 
+  select(time, SW_hourly, Wind_hourly, ShortWave, WindSpeed_nldas_weibulcor) %>% 
   mutate(SW_regress = ( coefficients(sw_lm)[1] + (coefficients(sw_lm)[2]* ShortWave) ) ,
-         WindSpeed_regress = ( coefficients(wind_lm)[1] + (coefficients(wind_lm)[2] * WindSpeed) )) %>% 
+         #WindSpeed_regress = ( coefficients(wind_lm)[1] + (coefficients(wind_lm)[2] * WindSpeed) )
+         ) %>% 
   mutate(PAR_from_SWregress = sw.to.par.base(SW_regress, coeff = 2.114)) %>% 
   rename(SW_hourly_metstation = SW_hourly,
          Wind_hourly_metstation = Wind_hourly,
-         ShortWave_nldas = ShortWave,
-         WindSpeed_nldas = WindSpeed)
+         ShortWave_nldas = ShortWave)
 
 #write csv
 write.csv(model_input, "./Data/Generated_Data/Met_input_from_NLDAS.csv", row.names = F)
@@ -323,8 +291,9 @@ write.csv(model_input, "./Data/Generated_Data/Met_input_from_NLDAS.csv", row.nam
 
 #check rmse and model fit for SW and Wind
 model_input_tests <- model_input %>% 
-  mutate(Diff_SW = SW_hourly_metstation - ShortWave_nldas,
-         Diff_Wind = Wind_hourly_metstation - WindSpeed_nldas) %>% 
+  mutate(Diff_SW = SW_hourly_metstation - ShortWave_nldas
+         #Diff_Wind = Wind_hourly_metstation - WindSpeed_nldas
+         ) %>% 
   filter(!is.na(SW_hourly_metstation),
          !is.na(Wind_hourly_metstation))
   
@@ -333,9 +302,8 @@ plot(model_input_tests$time, model_input_tests$Diff_SW)
 round(rmse(model_input_tests$SW_hourly_metstation, model_input_tests$ShortWave_nldas), digits = 3)
 
 
-plot(model_input_tests$time, model_input_tests$Diff_Wind)
-
-round(rmse(model_input_tests$Wind_hourly_metstation, model_input_tests$WindSpeed_nldas), digits = 3)
+# plot(model_input_tests$time, model_input_tests$Diff_Wind)
+# round(rmse(model_input_tests$Wind_hourly_metstation, model_input_tests$WindSpeed_nldas), digits = 3)
 
 
 
