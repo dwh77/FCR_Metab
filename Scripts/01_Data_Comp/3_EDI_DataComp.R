@@ -198,9 +198,9 @@ missing_met_dates <- c(seq(ymd_hms("2016-10-14 16:00:00"), ymd_hms("2016-12-19 1
 nldas_gapfill <- nldas %>% 
   dplyr::mutate(DateTime = ymd_hms(time)) %>% 
   dplyr::filter(DateTime %in% missing_met_dates) %>%   
-  dplyr::select(DateTime, WindSpeed_regress, PAR_from_SWregress) %>%
+  dplyr::select(DateTime, WindSpeed_nldas_weibulcor, PAR_from_SWregress) %>%
   dplyr::rename(PAR = PAR_from_SWregress,
-                windSpeed = WindSpeed_regress)
+                windSpeed = WindSpeed_nldas_weibulcor)
 
 met_15min_PAR_nldasfilled <- dplyr::full_join(met_15min_PAR, nldas_gapfill, by = c("DateTime", "PAR", "windSpeed")) %>% 
   dplyr::arrange(DateTime)
