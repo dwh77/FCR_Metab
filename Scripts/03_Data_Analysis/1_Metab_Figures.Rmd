@@ -545,7 +545,7 @@ iceonoff_summaryStats_clean
 ```
 
 ##### Revisions test 
-
+several comments
 ```{r}
 
 #### rates arround turnover 
@@ -620,130 +620,103 @@ secchi <- read.csv("../../Data/EDI2023/FCR_secchi_2022.csv")
   iceKDplot
 # ggplotly(iceKDplot)
   
-  
-####table 1 distributions 
-  
-metab_seasons_long |> 
-  ggplot()+
-  geom_density(aes(value))+
-  facet_grid(name~Season)+
-  theme_bw()
+
+```
+
+pdf distributions for expanding table 1
+
+```{r}
+
+metab_seasons_long <- metab_seasons_long |> 
+  mutate(name = ifelse(name == 'GPP_QAQC', "GPP", name),
+         name = ifelse(name == 'R_QAQC', "R", name),
+         name = ifelse(name == 'NEM_QAQC', "NEP", name))
 
 pdf_all <- metab_seasons_long |> 
+  # mutate(Reservoir = "FCR") |> 
   ggplot()+
-  geom_density(aes(value), fill = "lightgray", alpha = 0.4)+
-  facet_wrap(~name, scales = "free_x")+
-  theme_bw() + theme(text = element_text(size=14), panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
-  labs( x = metab_label2)
+  geom_density(aes(value),fill = "lightgray",  alpha = 0.4)+ #fill = "lightgray"
+  facet_wrap(~name, scales = "free")+
+  theme_bw() + theme(text = element_text(size=14), panel.grid.major = element_blank(), panel.grid.minor = element_blank())+ #, legend.position = "none"
+  labs( x = element_blank())   #+ scale_fill_manual(values = c("lightgray"))
 
 
 pdf_seasons <- metab_seasons_long |> 
-  # filter(Season == "Spring") |> 
+  # filter(value < 9,
+  #        value > -10) |> 
   ggplot()+
-  geom_density(aes(value, fill= as.factor(Season)), alpha = 0.4)+
-  facet_wrap(~name, scales = "free_x")+
+  geom_density(aes(value, fill= as.factor(Season)), alpha = 0.2)+
+  facet_wrap(~name, scales = "free")+
   theme_bw()+ theme(legend.position = "top", text = element_text(size=14), panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
    scale_fill_manual(values = c( "darkorange3", "darkturquoise", "green4", "slategray"))+
-  labs(fill = "Season", x = metab_label2)
+    #coord_flip()+
+  labs(fill = "Season", x = element_blank())
 
+# pdf_seasons_nowinter <- metab_seasons_long |> 
+#   filter(Season != "Winter") |> 
+#   ggplot()+
+#   geom_density(aes(value, fill= as.factor(Season)), alpha = 0.2)+
+#   facet_wrap(~name, scales = "free_x")+
+#   theme_bw()+ theme(legend.position = "top", text = element_text(size=14), panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
+#    scale_fill_manual(values = c( "darkorange3", "darkturquoise", "green4"))+
+#     #coord_flip()+
+#   labs(fill = "Season", x = element_blank())
 
-pdf_winter <- metab_seasons_long |> 
-  filter(Season == "Winter") |> 
+# pdf_winter <- metab_seasons_long |> 
+#   filter(Season == "Winter") |> 
+#   mutate(Ice = ifelse(icevector == 1, "Ice", "No Ice")) |> 
+#   ggplot()+
+#   geom_density(aes(value, fill = factor(Ice, levels = c("No Ice", "Ice"))), alpha = 0.8)+ #, alpha = 0.4
+#   facet_wrap(~name, scales = "free_x")+
+#   theme_bw()+ theme(legend.position = "top", text = element_text(size=14), panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
+#   scale_fill_manual(values = c("skyblue2", "#FAF9F6"))+
+#   #scale_fill_brewer(values = c( "Ice" = "#FAF9F6", "No Ice" = "skyblue2"), direction = -1)+
+#   labs(fill = "Ice-cover", x = metab_label2)
+
+pdf_winter_gpp <- metab_seasons_long |> 
+  filter(Season == "Winter",
+         name == "GPP") |> 
   mutate(Ice = ifelse(icevector == 1, "Ice", "No Ice")) |> 
   ggplot()+
   geom_density(aes(value, fill = factor(Ice, levels = c("No Ice", "Ice"))), alpha = 0.8)+ #, alpha = 0.4
   facet_wrap(~name, scales = "free_x")+
   theme_bw()+ theme(legend.position = "top", text = element_text(size=14), panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
   scale_fill_manual(values = c("skyblue2", "#FAF9F6"))+
-  #scale_fill_brewer(values = c( "Ice" = "#FAF9F6", "No Ice" = "skyblue2"), direction = -1)+
-  labs(fill = "Ice-cover", x = metab_label2)
+  labs(fill = "Ice-cover", x = gpp_label)
 
-
-#z <- ggpubr::ggarrange(pdf_all , pdf_seasons , pdf_winter, labels = "a", "b", "c", ncol = 3)
-
-z <- cowplot::plot_grid(pdf_all, pdf_seasons, pdf_winter, labels = c("a", "b", "c"), ncol = 1)
-
-# ggsave(filename = "../../Figures/newfig_pdf.jpg",
-#        z, device = "jpg", width = 300, height = 200, units = "mm")
-
-
-```
-
-more edits for pdf distibutions 
-
-```{r}
-
-# metab_seasons_long |> 
-#   # filter(Season == "Spring") |> 
-#   ggplot()+
-#   geom_density(aes(value, fill= as.factor(Season)), alpha = 0.2)+
-#   facet_wrap(~name, scales = "free_x")+
-#   theme_bw()+ theme(legend.position = "top", text = element_text(size=14), panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
-#    scale_fill_manual(values = c( "darkorange3", "darkturquoise", "green4", "slategray"))+
-#   #coord_flip()+
-#   xlim(-3,3)+
-#   labs(fill = "Season", x = metab_label2)
-
-
-
-########## 7 panels 
-all <- metab_seasons_long |> 
-  ggplot()+
-  geom_density(aes(value), fill = "black", alpha = 1)+
-  facet_wrap(~name, scales = "free_x")+
-  theme_bw() + theme(text = element_text(size=14), panel.grid.major = element_blank(), panel.grid.minor = element_blank())+  labs( x = element_blank())
-
-spring <- metab_seasons_long |>
-  filter(Season == "Spring") |> 
-  ggplot()+
-  geom_density(aes(value), fill = "darkturquoise", alpha = 1)+
-  facet_wrap(~name, scales = "free_x")+
-  theme_bw() + theme(text = element_text(size=14), panel.grid.major = element_blank(), panel.grid.minor = element_blank())+  labs( x = element_blank())
-
-summer <- metab_seasons_long |>
-  filter(Season == "Summer") |> 
-  ggplot()+
-  geom_density(aes(value), fill = "green4", alpha = 1)+
-  facet_wrap(~name, scales = "free_x")+
-  theme_bw() + theme(text = element_text(size=14), panel.grid.major = element_blank(), panel.grid.minor = element_blank())+  labs( x = element_blank())
-
-fall <- metab_seasons_long |>
-  filter(Season == "Fall") |> 
-  ggplot()+
-  geom_density(aes(value), fill = "darkorange3", alpha = 1)+
-  facet_wrap(~name, scales = "free_x")+
-  theme_bw() + theme(text = element_text(size=14), panel.grid.major = element_blank(), panel.grid.minor = element_blank())+  labs( x = element_blank())
-
-winter <- metab_seasons_long |>
-  filter(Season == "Winter") |> 
-  ggplot()+
-  geom_density(aes(value), fill = "slategray", alpha = 1)+
-  facet_wrap(~name, scales = "free_x")+
-  theme_bw() + theme(text = element_text(size=14), panel.grid.major = element_blank(), panel.grid.minor = element_blank())+  labs( x = element_blank())
-
-ice_free <- metab_seasons_long |>
+pdf_winter_r <- metab_seasons_long |> 
   filter(Season == "Winter",
-         icevector == 0) |> 
+         name == "R") |> 
+  mutate(Ice = ifelse(icevector == 1, "Ice", "No Ice")) |> 
   ggplot()+
-  geom_density(aes(value), fill = "skyblue2", alpha = 1)+
+  geom_density(aes(value, fill = factor(Ice, levels = c("No Ice", "Ice"))), alpha = 0.8)+ #, alpha = 0.4
   facet_wrap(~name, scales = "free_x")+
-  theme_bw() + theme(text = element_text(size=14), panel.grid.major = element_blank(), panel.grid.minor = element_blank())+  labs( x = element_blank())
+  theme_bw()+ theme(legend.position = "top", text = element_text(size=14), panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
+  scale_fill_manual(values = c("skyblue2", "#FAF9F6"))+
+  labs(fill = "Ice-cover", x = r_label, y = element_blank())
 
-ice_covered <- metab_seasons_long |>
+
+pdf_winter_nep <- metab_seasons_long |> 
   filter(Season == "Winter",
-         icevector == 1) |> 
+         name == "NEP") |> 
+  mutate(Ice = ifelse(icevector == 1, "Ice", "No Ice")) |> 
   ggplot()+
-  geom_density(aes(value), fill = "#FAF9F6", alpha = 1)+
+  geom_density(aes(value, fill = factor(Ice, levels = c("No Ice", "Ice"))), alpha = 0.8)+ #, alpha = 0.4
   facet_wrap(~name, scales = "free_x")+
-  theme_bw() + theme(text = element_text(size=14), panel.grid.major = element_blank(), panel.grid.minor = element_blank())+  labs( x = metab_label2)
+  theme_bw()+ theme(legend.position = "top", text = element_text(size=14), panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
+  scale_fill_manual(values = c("skyblue2", "#FAF9F6"))+
+  xlim(min(metab_seasons$NEM_QAQC, na.rm = T), max(metab_seasons$NEM_QAQC, na.rm = T))+
+  labs(fill = "Ice-cover", x = nep_label, y = element_blank())
 
-zz <- cowplot::plot_grid(all, spring, summer, fall, winter, ice_free, ice_covered, 
-                         labels = c("a", "b", "c", "d", "e", "f", "g"), ncol = 1, rel_heights = c(1,1,1,1,1,1,1.2))
 
-zz
+winter_z <- cowplot::plot_grid(pdf_winter_gpp, pdf_winter_nep, pdf_winter_r, ncol = 3)
 
-ggsave(filename = "../../Figures/newfig_pdf_long.jpg",
-       zz, device = "jpg", width = 300, height = 300, units = "mm")
+z <- cowplot::plot_grid(pdf_all, pdf_seasons, winter_z, labels = c("a", "b", "c"), 
+                        ncol = 1, rel_heights = c(1.6, 2.1, 2.1))
+
+ggsave(filename = "../../Figures/newfig_pdf.jpg",
+       z, device = "jpg", width = 300, height = 200, units = "mm")
+
 
 ```
 
