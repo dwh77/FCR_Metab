@@ -517,9 +517,28 @@ seasons_summaryStats_clean <- metab_seasons_long %>%
   select(name, Season, range) %>% 
   pivot_wider(names_from = Season, values_from = range) %>% 
   select(name, Spring, Summer, Fall, Winter)
-  
 
 seasons_summaryStats_clean
+
+
+metab_seasons_long %>% 
+  filter(!is.na(name)) %>% 
+  group_by(name, Season) %>% 
+  summarise(min = min(value, na.rm = T),
+            quantile25 = quantile(value, probs = c(.25), na.rm = T),
+            mean = mean(value, na.rm = T),
+            median = median(value, na.rm = T),
+            quantile75 = quantile(value, probs = c(.75), na.rm = T),
+            max = max(value, na.rm = T),
+            sd = sd(value, na.rm = T)
+            ) %>% 
+  mutate(median_sd = paste(round(median, 2), round(sd, 2), sep = " +- "),
+         IQR =   paste(round(quantile25, 2), round(quantile75, 2), sep = " - ")  ) %>% 
+  select(name, Season, IQR) %>% 
+  pivot_wider(names_from = Season, values_from = IQR) %>% 
+  select(name, Spring, Summer, Fall, Winter)
+  
+
 
 ## Ice on vs ice off summary stats 
 iceonoff_summaryStats_clean <- metab_seasons_long %>% 
@@ -539,8 +558,26 @@ iceonoff_summaryStats_clean <- metab_seasons_long %>%
          range =   paste(round(min, 3), round(max, 3), sep = " - ")  ) %>% 
   select(name, Ice_on_off, range) %>% 
   pivot_wider(names_from = Ice_on_off, values_from = range)  
+
+iceonoff_summaryStats_clean_IQR <- metab_seasons_long %>% 
+  filter(!is.na(name),
+         Season == "Winter") %>% 
+  mutate(Ice_on_off = ifelse(icevector == 1, "Ice Cover", "No Ice Cover")) %>%  
+  group_by(name, Ice_on_off) %>% 
+  summarise(min = min(value, na.rm = T),
+            quantile25 = quantile(value, probs = c(.25), na.rm = T),
+            mean = mean(value, na.rm = T),
+            median = median(value, na.rm = T),
+            quantile75 = quantile(value, probs = c(.75), na.rm = T),
+            max = max(value, na.rm = T),
+            sd = sd(value, na.rm = T)
+            ) %>% 
+  mutate(median_sd = paste(round(median, 2), round(sd, 2), sep = " +- "),
+         IQR =   paste(round(quantile25, 2), round(quantile75, 2), sep = " - ")  ) %>% 
+  select(name, Ice_on_off, IQR) %>% 
+  pivot_wider(names_from = Ice_on_off, values_from = IQR)  
   
-iceonoff_summaryStats_clean
+iceonoff_summaryStats_clean_IQR
 
 ```
 
@@ -627,12 +664,12 @@ pdf distributions for expanding table 1
 
 ```{r}
 
-metab_seasons_long <- metab_seasons_long |> 
+metab_seasons_long_pdffig <- metab_seasons_long |> 
   mutate(name = ifelse(name == 'GPP_QAQC', "GPP", name),
          name = ifelse(name == 'R_QAQC', "R", name),
          name = ifelse(name == 'NEM_QAQC', "NEP", name))
 
-pdf_all <- metab_seasons_long |> 
+pdf_all <- metab_seasons_long_pdffig |> 
   # mutate(Reservoir = "FCR") |> 
   ggplot()+
   geom_density(aes(value),fill = "lightgray",  alpha = 0.4)+ #fill = "lightgray"
@@ -641,7 +678,7 @@ pdf_all <- metab_seasons_long |>
   labs( x = element_blank())   #+ scale_fill_manual(values = c("lightgray"))
 
 
-pdf_seasons <- metab_seasons_long |> 
+pdf_seasons <- metab_seasons_long_pdffig |> 
   # filter(value < 9,
   #        value > -10) |> 
   ggplot()+
@@ -652,7 +689,7 @@ pdf_seasons <- metab_seasons_long |>
     #coord_flip()+
   labs(fill = "Season", x = element_blank())
 
-# pdf_seasons_nowinter <- metab_seasons_long |> 
+# pdf_seasons_nowinter <- metab_seasons_long_pdffig |> 
 #   filter(Season != "Winter") |> 
 #   ggplot()+
 #   geom_density(aes(value, fill= as.factor(Season)), alpha = 0.2)+
@@ -662,7 +699,7 @@ pdf_seasons <- metab_seasons_long |>
 #     #coord_flip()+
 #   labs(fill = "Season", x = element_blank())
 
-# pdf_winter <- metab_seasons_long |> 
+# pdf_winter <- metab_seasons_long_pdffig |> 
 #   filter(Season == "Winter") |> 
 #   mutate(Ice = ifelse(icevector == 1, "Ice", "No Ice")) |> 
 #   ggplot()+
@@ -673,7 +710,7 @@ pdf_seasons <- metab_seasons_long |>
 #   #scale_fill_brewer(values = c( "Ice" = "#FAF9F6", "No Ice" = "skyblue2"), direction = -1)+
 #   labs(fill = "Ice-cover", x = metab_label2)
 
-pdf_winter_gpp <- metab_seasons_long |> 
+pdf_winter_gpp <- metab_seasons_long_pdffig |> 
   filter(Season == "Winter",
          name == "GPP") |> 
   mutate(Ice = ifelse(icevector == 1, "Ice", "No Ice")) |> 
@@ -684,7 +721,7 @@ pdf_winter_gpp <- metab_seasons_long |>
   scale_fill_manual(values = c("skyblue2", "#FAF9F6"))+
   labs(fill = "Ice-cover", x = gpp_label)
 
-pdf_winter_r <- metab_seasons_long |> 
+pdf_winter_r <- metab_seasons_long_pdffig |> 
   filter(Season == "Winter",
          name == "R") |> 
   mutate(Ice = ifelse(icevector == 1, "Ice", "No Ice")) |> 
@@ -696,7 +733,7 @@ pdf_winter_r <- metab_seasons_long |>
   labs(fill = "Ice-cover", x = r_label, y = element_blank())
 
 
-pdf_winter_nep <- metab_seasons_long |> 
+pdf_winter_nep <- metab_seasons_long_pdffig |> 
   filter(Season == "Winter",
          name == "NEP") |> 
   mutate(Ice = ifelse(icevector == 1, "Ice", "No Ice")) |> 
