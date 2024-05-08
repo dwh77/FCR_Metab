@@ -494,9 +494,9 @@ fullTSgroup <- metab_seasons_long %>%
             quantile75 = quantile(value, probs = c(.75), na.rm = T),
             max = max(value, na.rm = T),
             sd = sd(value, na.rm = T)
-            ) %>% 
-  mutate(NEW_name = paste(name, "AllData", sep = "_")) %>% 
-  select(name, median, sd, min, max) 
+            ) #%>% 
+  # mutate(NEW_name = paste(name, "AllData", sep = "_")) %>% 
+  # select(name, median, sd, min, max) 
 
 fullTSgroup
 
@@ -672,7 +672,7 @@ metab_seasons_long_pdffig <- metab_seasons_long |>
 pdf_all <- metab_seasons_long_pdffig |> 
   # mutate(Reservoir = "FCR") |> 
   ggplot()+
-  geom_density(aes(value),fill = "lightgray",  alpha = 0.4)+ #fill = "lightgray"
+  geom_density(aes(value),fill = "pink",  alpha = 0.4)+ #fill = "lightgray"
   facet_wrap(~name, scales = "free")+
   theme_bw() + theme(text = element_text(size=14), panel.grid.major = element_blank(), panel.grid.minor = element_blank())+ #, legend.position = "none"
   labs( x = element_blank())   #+ scale_fill_manual(values = c("lightgray"))
